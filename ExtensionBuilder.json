@@ -1,0 +1,43 @@
+{
+    "modules": [],
+    "properties": {
+        "backendModules": [
+            {
+                "actions": {
+                    "controllerActionCombinations": "Slug => overview,rebuild"
+                },
+                "description": "",
+                "key": "rebuild",
+                "mainModule": "web",
+                "name": "Rebuild Slug",
+                "tabLabel": ""
+            }
+        ],
+        "description": "Rebuild URL slugs",
+        "emConf": {
+            "category": "plugin",
+            "custom_category": "",
+            "dependsOn": "typo3 => 9.5.0-9.5.99\n",
+            "disableLocalization": false,
+            "disableVersioning": false,
+            "skipGenerateDocumentationTemplate": false,
+            "sourceLanguage": "en",
+            "state": "alpha",
+            "targetVersion": "9.5.0-9.5.99",
+            "version": "1.0.0"
+        },
+        "extensionKey": "ig_slug",
+        "name": "Managing slugs",
+        "originalExtensionKey": "",
+        "originalVendorName": "",
+        "persons": [],
+        "plugins": [],
+        "vendorName": "Ig"
+    },
+    "wires": [],
+    "log": {
+        "last_modified": "2019-02-08 09:29",
+        "extension_builder_version": "9.10.0",
+        "be_user": " (1)"
+    }
+}

@@ -1,0 +1,15 @@
+
+# Module configuration
+module.tx_igslug_web_igslugrebuild {
+    persistence {
+        storagePid = {$module.tx_igslug_rebuild.persistence.storagePid}
+    }
+    view {
+        templateRootPaths.0 = EXT:ig_slug/Resources/Private/Backend/Templates/
+        templateRootPaths.1 = {$module.tx_igslug_rebuild.view.templateRootPath}
+        partialRootPaths.0 = EXT:ig_slug/Resources/Private/Backend/Partials/
+        partialRootPaths.1 = {$module.tx_igslug_rebuild.view.partialRootPath}
+        layoutRootPaths.0 = EXT:ig_slug/Resources/Private/Backend/Layouts/
+        layoutRootPaths.1 = {$module.tx_igslug_rebuild.view.layoutRootPath}
+    }
+}

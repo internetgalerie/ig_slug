@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2018-11-24T09:35:38Z" product-name="igSlug">
+		<header/>
+		<body>
+			<trans-unit id="igSlug.pageTitle">
+				<source>Slugs</source>
+			</trans-unit>
+			<trans-unit id="igSlug.populateSlug">
+				<source>Rebuild slugs</source>
+			</trans-unit>
+			<trans-unit id="igSlug.populatedSlug">
+				<source>%d slug updated</source>
+			</trans-unit>
+			<trans-unit id="igSlug.populatedSlugs">
+				<source>%d slugs updated</source>
+			</trans-unit>
+			<trans-unit id="igSlug.oldSlug">
+				<source>old slug</source>
+			</trans-unit>
+			<trans-unit id="igSlug.newSlug">
+				<source>new slug</source>
+			</trans-unit>
+ 			<trans-unit id="igSlug.attributes">
+				<source>attributes</source>
+			</trans-unit>
+			<trans-unit id="igSlug.locked">
+				<source>locked</source>
+			</trans-unit>
+			<trans-unit id="igSlug.all">
+				<source>all</source>
+			</trans-unit>
+			<trans-unit id="igSlug.changes">
+				<source>only changes</source>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.title">
+				<source>Confirm</source>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.message">
+				<source>Really rebuild the slugs?</source>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

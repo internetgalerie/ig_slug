@@ -1,0 +1,18 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:bad="http://typo3.org/ns/Ig/IgSlug/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<be:moduleLayout>
+
+        <f:be.pageRenderer 
+          includeCssFiles="{1: '{f:uri.resource(path:\'Css/ig_slug_be.css\')}'}" 
+	  includeRequireJsModules="{ 0:'TYPO3/CMS/Backend/Modal',1:'TYPO3/CMS/IgSlug/Confirm',2: 'TYPO3/CMS/Backend/ContextMenu'}"
+          />
+	<bad:moduleLayout.metaInformation pageUid="{pageUid}" />
+
+
+
+        <f:render section="Content" />
+
+</be:moduleLayout>
+
+</html>

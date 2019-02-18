@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file target-language="en" datatype="plaintext" original="messages" date="2018-11-24T09:35:38Z" product-name="igSlug" source-language="de">
+		<header/>
+		<body>
+			<trans-unit id="igSlug.pageTitle">
+				<target>Slugs</target>
+			</trans-unit>
+			<trans-unit id="igSlug.populateSlug">
+				<target>Slugs neubilden</target>
+			</trans-unit>
+			<trans-unit id="igSlug.populatedSlug">
+				<target>%d slug aktualisiert</target>
+			</trans-unit>
+			<trans-unit id="igSlug.populatedSlugs">
+				<target>%d slugs aktualisiert</target>
+			</trans-unit>
+			<trans-unit id="igSlug.oldSlug">
+				<target>bisheriger slug</target>
+			</trans-unit>
+			<trans-unit id="igSlug.newSlug">
+				<target>neuer slug</target>
+			</trans-unit>
+ 			<trans-unit id="igSlug.attributes">
+				<target>Attribute</target>
+			</trans-unit>
+			<trans-unit id="igSlug.locked">
+				<target>locked</target>
+			</trans-unit>
+			<trans-unit id="igSlug.all">
+				<target>Alle</target>
+			</trans-unit>
+			<trans-unit id="igSlug.changes">
+				<target>nur Änderungen</target>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.title">
+				<target>Bestätigen</target>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.message">
+				<target>Tatsächlich alle Einträge neu bilden?</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

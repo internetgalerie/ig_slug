@@ -1,0 +1,23 @@
+{
+    "name": "ig/ig-slug",
+    "type": "typo3-cms-extension",
+    "description": "Rebuild URL slugs",
+    "authors": [],
+    "require": {
+        "typo3/cms-core": "^8.7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ig\\IgSlug\\": "Classes"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ig\\IgSlug\\Tests\\": "Tests"
+        }
+    },
+    "replace": {
+        "ig_slug": "self.version",
+        "typo3-ter/ig-slug": "self.version"
+    }
+}
