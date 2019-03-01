@@ -26,4 +26,5 @@ call_user_func(function () {
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addTCAcolumns('pages', $fields);
     $GLOBALS['TCA']['pages']['columns']['slug']['config']['size'] = 100;
     $GLOBALS['TCA']['pages']['palettes']['title']['showitem'] = 'title;LLL:EXT:frontend/Resources/Private/Language/locallang_tca.xlf:pages.title_formlabel, --linebreak--, slug, slug_locked, --linebreak--, nav_title;LLL:EXT:frontend/Resources/Private/Language/locallang_tca.xlf:pages.nav_title_formlabel, --linebreak--, subtitle;LLL:EXT:frontend/Resources/Private/Language/locallang_tca.xlf:pages.subtitle_formlabel';
+    $GLOBALS['TCA']['pages']['palettes']['titleonly']['showitem'] = 'title;LLL:EXT:frontend/Resources/Private/Language/locallang_tca.xlf:pages.title_formlabel, --linebreak--, slug, slug_locked';
   });
