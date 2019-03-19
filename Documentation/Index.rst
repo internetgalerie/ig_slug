@@ -17,7 +17,7 @@ Managing slugs
 		ig_slug
 
 	:Version:
-		0.9.0
+		1.0.1
 
 	:Language:
 		en
