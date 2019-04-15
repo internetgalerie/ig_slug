@@ -102,7 +102,7 @@ class SlugsUtility {
       if( $this->table=='pages' ) {
 	return $this->doSlugsByUid( $uids, $doUdpates,  $recursive, 0, $lang);
       } else {
-	return $this->doSlugsByPid( $uids, $doUdpates,  $recursive, 0, $lang);
+	return $this->doSlugsByPid( $uids, $doUdpates,  $recursive, 0, $lang, false);
       }
     }
 
@@ -117,9 +117,11 @@ class SlugsUtility {
       $recursiveEntries=[];
       $statement = $this->getStatementByUid( $uids, $lang );
       while ($record = $statement->fetch()) {
+	$hasUpdate=false;
 	if($this->table!='pages' || ( $GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
 	  //die($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] .'='. $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] .' mit '. print_r($this->siteLanguagesIds,true). '='. $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]));
 	  $entry = $this->slugUtility->getEntryByRecord( $record, $depth );
+	  $hasUpdate=$entry['updated'];
 	  if( $doUdpates && $entry['updated'] ) {
 	    $this->countUpdates++;
   	    $this->slugUtility->updateEntry( $entry );
@@ -127,7 +129,7 @@ class SlugsUtility {
 	  $entries[] = $entry;
 	}
 	if($recursive) {
-	  $subentries=$this->doSlugsByPid( [$record['uid']], $doUdpates,  $recursive, $depth+1, $lang);
+	  $subentries=$this->doSlugsByPid( [$record['uid']], $doUdpates,  $recursive, $depth+1, $lang , $hasUpdate);
 	  if(count($subentries)) {
 	    $subentries[count($subentries)-1]['depthLast']=true; // mark for easy output
 	  }
@@ -145,7 +147,7 @@ class SlugsUtility {
   /**
    * Fills the database table with slugs based on the slug fields and its configuration.
    */
-  public function doSlugsByPid( array $uids, bool $doUdpates=false, bool $recursive=false, int $depth=0, int $lang=null ) :array
+  public function doSlugsByPid( array $uids, bool $doUdpates=false, bool $recursive=false, int $depth=0, int $lang=null, bool $parentHasUpdates=false ) :array
     {
       $entries=[];
       //$depth--;
@@ -154,8 +156,10 @@ class SlugsUtility {
       }
       $statement = $this->getStatementByPid( $uids, $lang );
       while ($record = $statement->fetch()) {
+	$hasUpdate=false;
 	if($this->table!='pages' || ( $GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
-	  $entry = $this->slugUtility->getEntryByRecord( $record, $depth );
+	  $entry = $this->slugUtility->getEntryByRecord( $record, $depth, $parentHasUpdates );
+	  $hasUpdate=$entry['updated'];
 	  if( $doUdpates && $entry['updated'] ) {
 	    $this->countUpdates++;
   	    $this->slugUtility->updateEntry( $entry );
@@ -164,7 +168,7 @@ class SlugsUtility {
 
 	}
 	if($recursive) {
-	  $subentries=$this->doSlugsByPid( [$record['uid']], $doUdpates,  $recursive, $depth+1, $lang);
+	  $subentries=$this->doSlugsByPid( [$record['uid']], $doUdpates,  $recursive, $depth+1, $lang, $parentHasUpdates || $hasUpdate);
 	  if(count($subentries)) {
 	    $subentries[count($subentries)-1]['depthLast']=true; // mark for easy output
 	  }

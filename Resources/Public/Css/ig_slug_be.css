@@ -9,3 +9,6 @@
 .table-slug td.col-center {
     text-align: center;
 }
+.table-slug .diff-item-result.diff-item-maybe {
+    color: #c88005;
+}

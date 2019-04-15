@@ -38,8 +38,8 @@
 	    </f:if>
 	    <f:if condition="{entry.slugLocked} || !{entry.updated}">
 	      <f:then>
-		<td class="col-responsive col-slug">{entry.slug}</td>
-		<td class="col-responsive col-slug">{entry.slug}</td>
+		<td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
+		<td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
 	      </f:then>
 	      <f:else>
 		<td class="diff-item-result col-responsive col-slug"><del>{entry.slug}</del></td>

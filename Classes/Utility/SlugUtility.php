@@ -53,8 +53,15 @@ class SlugUtility {
      }
   }
 
-
-  public function getEntryByRecord( $record, int $depth=0 )
+  /**
+   * builds slut changes entry for output from database entry
+   *
+   * @param array $record DB Entry
+   * @param int $depth tree deepth
+   * @param bool $parentHasUpdates parents needs updates
+   * @return array
+   */
+  public function getEntryByRecord( $record, int $depth=0, bool $parentHasUpdates=false )
   {
 	$recordId = (int)$record['uid'];
 	$pid = (int)$record['pid'];
@@ -79,6 +86,7 @@ class SlugUtility {
 	$entry=[
 		'uid' => $recordId,
 		'updated' => $slug!=$record[$this->slugFieldName],
+		'parentUpdated' => $parentHasUpdates,
 		'newSlug' =>$slug,
 		'slug' => $record[$this->slugFieldName],
 		'slugLocked' => $slugLocked,
