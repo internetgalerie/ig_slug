@@ -13,8 +13,8 @@ use TYPO3\CMS\Backend\ViewHelpers\ModuleLayoutViewHelper;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3Fluid\Fluid\View\Exception;
 
-
-class MetaInformationViewHelper extends AbstractViewHelper {
+class MetaInformationViewHelper extends AbstractViewHelper
+{
     use CompileWithRenderStatic;
 
 
@@ -33,13 +33,13 @@ class MetaInformationViewHelper extends AbstractViewHelper {
         \Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
     ): void {
-      $viewHelperVariableContainer = $renderingContext->getViewHelperVariableContainer();
-      self::ensureProperNesting($viewHelperVariableContainer); // not really needed, nonody else are needed this one
-      $moduleTemplate = $viewHelperVariableContainer->get(ModuleLayoutViewHelper::class, ModuleTemplate::class);
+        $viewHelperVariableContainer = $renderingContext->getViewHelperVariableContainer();
+        self::ensureProperNesting($viewHelperVariableContainer); // not really needed, nonody else are needed this one
+        $moduleTemplate = $viewHelperVariableContainer->get(ModuleLayoutViewHelper::class, ModuleTemplate::class);
 
-      if($arguments['pageUid']) {
-	$moduleTemplate->getDocHeaderComponent()->setMetaInformation(\TYPO3\CMS\Backend\Utility\BackendUtility::readPageAccess($arguments['pageUid'], ''));
-      }
+        if ($arguments['pageUid']) {
+            $moduleTemplate->getDocHeaderComponent()->setMetaInformation(\TYPO3\CMS\Backend\Utility\BackendUtility::readPageAccess($arguments['pageUid'], ''));
+        }
     }
 
     /**
@@ -52,6 +52,4 @@ class MetaInformationViewHelper extends AbstractViewHelper {
             throw new Exception(sprintf('%s must be nested in <f.be.moduleLayout> view helper', self::class), 1531216505);
         }
     }
-  
 }
-
