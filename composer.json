@@ -1,8 +1,22 @@
 {
-    "name": "ig/ig-slug",
+    "name": "internetgalerie/ig-slug",
     "type": "typo3-cms-extension",
     "description": "Rebuild URL slugs",
-    "authors": [],
+    "keywords": [
+	"TYPO3",
+	"extension",
+	"slug",
+	"url"
+    ],
+    "homepage": "https://www.internetgalerie.ch",
+    "authors": [
+	{
+	    "name": "Daniel Abplanalp",
+	    "role": "Developer",
+	    "homepage": "https://www.internetgalerie.ch"
+	}
+    ],
+    "license": ["GPL-2.0-or-later"],
     "require": {
         "typo3/cms-core": "^9.5.0"
     },
