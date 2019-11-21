@@ -59,6 +59,12 @@ class SlugsUtility
         $this->fieldNamesToShow=$fieldNamesToShow;
     }
   
+    public function populateSlugsAll(int $lang=null)
+    {
+        $this->doSlugsAll(true, $lang);
+        return $this->countUpdates;
+    }
+
     public function populateSlugs(array $uids, int $lang=null)
     {
         $this->doSlugs($uids, true, false, 1, $lang);
@@ -179,6 +185,32 @@ class SlugsUtility
     }
 
 
+  
+    /**
+     * Fills the database table with slugs based on the slug fields and its configuration.
+     */
+    public function doSlugsAll(bool $doUdpates=false, int $lang=null) :array
+    {
+        $entries=[];
+        $this->slugUtility = GeneralUtility::makeInstance(SlugUtility::class, $this->table, $this->slugFieldName, $this->slugLockedFieldName, $this->fieldNamesToShow);
+
+        $statement = $this->getStatementAll($lang);
+        while ($record = $statement->fetch()) {
+            $hasUpdate=false;
+            if ($this->table!='pages' || ($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
+                $entry = $this->slugUtility->getEntryByRecord($record, 0, false);
+                $hasUpdate=$entry['updated'];
+                if ($doUdpates && $entry['updated']) {
+                    $this->countUpdates++;
+                    $this->slugUtility->updateEntry($entry);
+                }
+                $entries[] = $entry;
+            }
+        }
+        return $entries;
+    }
+
+
 
 
   
@@ -218,7 +250,7 @@ class SlugsUtility
                 $queryBuilder->expr()->in('pid', $uids)
             );
             // non pages table - only show entries with the correct language
-            if ($GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
+            if ( !empty($this->getLanguageIds()) && $GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
                 if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
                     $queryBuilder->andWhere($queryBuilder->expr()->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds()));
                 }
@@ -270,6 +302,32 @@ class SlugsUtility
             ->execute();
     }
   
+
+    protected function getStatementAll(int $lang=null)
+    {
+        $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
+        $queryBuilder = $connection->createQueryBuilder();
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+    
+        $queryBuilder->select('*')
+            ->from($this->table);
+        // only show entries with the correct language
+        if ( !empty($this->getLanguageIds()) && $GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
+            if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
+                $queryBuilder->andWhere($queryBuilder->expr()->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds()));
+            }
+            if ($lang!==null) {
+                $queryBuilder->andWhere($queryBuilder->expr()->eq($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)));
+            }
+        }
+        $queryBuilder->addOrderBy('pid', 'asc');
+        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
+            $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
+        }
+        
+        return $queryBuilder->execute();
+    }
+
   
 
     public function getSlugTables()
