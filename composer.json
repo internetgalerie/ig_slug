@@ -31,7 +31,12 @@
         }
     },
     "replace": {
-        "ig_slug": "self.version",
+        "internetgalerie/ig-slug": "self.version",
         "typo3-ter/ig-slug": "self.version"
+    },
+    "extra": {
+	"typo3/cms": {
+	    "extension-key": "ig_slug"
+	}
     }
 }
