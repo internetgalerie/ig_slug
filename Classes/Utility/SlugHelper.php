@@ -63,7 +63,7 @@ class SlugHelper extends \TYPO3\CMS\Core\DataHandling\SlugHelper
         $this->applySlugConstraint($queryBuilder, $slug);
         $this->applyRecordConstraint($queryBuilder, $recordId);
         $this->applyLanguageConstraint($queryBuilder, $languageId);
-        $this->applyWorkspaceConstraint($queryBuilder);
+        $this->applyWorkspaceConstraint($queryBuilder, $state);
         $statement = $queryBuilder->execute();
 
         $records = $this->resolveVersionOverlays(
