@@ -292,10 +292,10 @@ class SlugsUtility
           $queryBuilder->andWhere( $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)));
           }
         */
-        // Ensure that fields with alias are managed first
-        return $queryBuilder->orderBy('alias', 'desc')
+
+        return $queryBuilder
             // Ensure that live workspace records are handled first
-            ->addOrderBy('t3ver_wsid', 'asc')
+            ->orderBy('t3ver_wsid', 'asc')
             // Ensure that all pages are run through "per parent page" field, and in the correct sorting values
             ->addOrderBy('pid', 'asc')
             ->addOrderBy('sorting', 'asc')
