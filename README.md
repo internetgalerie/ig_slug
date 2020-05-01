@@ -1,5 +1,9 @@
 # TYPO3 Extension  'ig_slug'
 
+[![Latest Stable Version](https://poser.pugx.org/internetgalerie/ig-slug/v/stable)](https://packagist.org/packages/internetgalerie/ig-slug)
+[![Monthly Downloads](https://poser.pugx.org/internetgalerie/ig-slug/d/monthly)](https://packagist.org/packages/internetgalerie/ig-slug)
+[![License](https://poser.pugx.org/internetgalerie/ig-slug/license)](https://packagist.org/packages/internetgalerie/ig-slug)
+
 Rebuild URL slugs of pages an other tables
 
 ## 1. What does it do?
@@ -23,6 +27,17 @@ The recommended way to install the extension is by using [Composer][2]. In your 
 #### Installation as extension from TYPO3 Extension Repository (TER)
 
 Download and install the extension with the extension manager module.
+
+
+### 2) CLI
+
+The slugs can also rebuilded in CLI, e.g.
+
+`typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news`
+
+or with pid 
+
+`typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99` 
 
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/

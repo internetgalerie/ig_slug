@@ -17,7 +17,7 @@ Managing slugs
 		ig_slug
 
 	:Version:
-		1.0.1
+		1.0.4
 
 	:Language:
 		en
@@ -29,7 +29,7 @@ Managing slugs
 		slug,speaking url,slugs,rebuild,url,tool
 
 	:Copyright:
-		2019
+		2020
 
 	:Author:
 

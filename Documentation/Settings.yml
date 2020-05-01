@@ -8,10 +8,10 @@
 
 ---
 conf.py:
-  copyright: 2019
+  copyright: 2020
   project: Managing slugs
-  version: 0.9.0
-  release: 0.9.0
+  version: 1.0.4
+  release: 1.0.4
   intersphinx_mapping:
     t3tsref:
     - http://docs.typo3.org/typo3cms/TyposcriptReference/

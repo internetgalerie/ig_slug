@@ -83,8 +83,10 @@ class UpdateCommand extends Command
              $message=\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]);
 
             $io->success($message);
+            return 0;
         } else {
             $io->error('Error table "'.$tablename . '" not found');
+            return 1;
         }
  
         //$io->writeln('<comment>Data user=' . $username . ', is password valid='.$validPassword.', FTP User = '. $ftpUser.', new password hash=' .$hashedPassword . '</comment>');
