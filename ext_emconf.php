@@ -12,7 +12,7 @@
 
 $EM_CONF[$_EXTKEY] = [
     'title' => 'Rebuild URL slugs',
-    'description' => 'Rebuild URL slugs of pages an other tables',
+    'description' => 'Rebuild URL slugs of the pages table and others',
     'category' => 'module',
     'author' => 'Daniel Abplanalp',
     'author_email' => 'typo3@internetgalerie.ch',
