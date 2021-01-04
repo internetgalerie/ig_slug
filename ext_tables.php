@@ -22,7 +22,7 @@ call_user_func(
                     'rebuild', // Submodule key
                     '', // Position
                     [
-                        'Slug' => 'list, update',
+                        \Ig\IgSlug\Controller\SlugController::class => 'list, update',
                     
                     ],
                     [
