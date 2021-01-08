@@ -33,6 +33,5 @@ call_user_func(
                 );
             }
         }
-        \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile('ig_slug', 'Configuration/TypoScript', 'Managing slugs');
     }
 );
