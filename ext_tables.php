@@ -8,6 +8,8 @@ call_user_func(
                 \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
             )->get('ig_slug');
 
+            // drop on final TYPO3 11 release
+            $controllerName = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getNumericTypo3Version()) >= 10000000 ? \Ig\IgSlug\Controller\SlugController::class : 'Slug';
             if (isset($extConf['disableOwnMenuItem']) && $extConf['disableOwnMenuItem']==1) {
                 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::insertModuleFunction(
                     'web_info',
@@ -22,7 +24,7 @@ call_user_func(
                     'rebuild', // Submodule key
                     '', // Position
                     [
-                        \Ig\IgSlug\Controller\SlugController::class => 'list, update',
+                        $controllerName => 'list, update',
                     
                     ],
                     [
