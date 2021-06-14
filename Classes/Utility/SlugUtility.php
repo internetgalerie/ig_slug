@@ -19,6 +19,7 @@ class SlugUtility
     protected $slugLockedFieldName=null;
     protected $hasToBeUniqueInSite;
     protected $hasToBeUniqueInPid;
+    protected $hasToBeUniqueInTable;
     protected $fieldNamesToShow;
   
     /**
@@ -40,6 +41,7 @@ class SlugUtility
         $evalInfo = !empty($fieldConfig['eval']) ? GeneralUtility::trimExplode(',', $fieldConfig['eval'], true) : [];
         $this->hasToBeUniqueInSite = in_array('uniqueInSite', $evalInfo, true);
         $this->hasToBeUniqueInPid = in_array('uniqueInPid', $evalInfo, true);
+        $this->hasToBeUniqueInTable = in_array('unique', $evalInfo, true);
         $this->slugHelper = GeneralUtility::makeInstance(SlugHelper::class, $this->table, $this->slugFieldName, $fieldConfig);
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
         $queryBuilder->getRestrictions()
@@ -80,6 +82,9 @@ class SlugUtility
             }
             if ($this->hasToBeUniqueInPid && !$this->slugHelper->isUniqueInPid($slug, $state)) {
                 $slug = $this->slugHelper->buildSlugForUniqueInPid($slug, $state);
+            }
+            if ($this->hasToBeUniqueInTable && !$this->slugHelper->isUniqueInTable($slug, $state)) {
+                $slug = $this->slugHelper->buildSlugForUniqueInTable($slug, $state);
             }
         }
         $entry=[
