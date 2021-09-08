@@ -29,14 +29,14 @@ call_user_func(function () {
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette(
         'pages',
         'title',
-        'slug_locked',
+        '--linebreak--,slug_locked',
         'after:slug'
     );
 
     \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addFieldsToPalette(
         'pages',
         'titleonly',
-        'slug_locked',
+        '--linebreak--,slug_locked',
         'after:slug'
     );
 });
