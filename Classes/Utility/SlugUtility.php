@@ -2,14 +2,16 @@
 declare(strict_types = 1);
 namespace Ig\IgSlug\Utility;
 
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
-//use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Database\Query\Restriction\BackendWorkspaceRestriction;
+use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Cache\CacheManager;
 
 class SlugUtility
 {
@@ -111,28 +113,28 @@ class SlugUtility
 
             if (isset($tcaCtrl['enablecolumns']) && is_array($tcaCtrl['enablecolumns'])) {
                 foreach ($tcaCtrl['enablecolumns'] as $name) {
-                    $entry[$name]=$record[$name];
+                    $entry[$name] = $record[$name];
                 }
             }
             // Create entries for output
             $depthHTML='';
             for ($d=$depth;$d>0;$d--) {
-                $depthHTML='<span class="treeline-icon treeline-icon-clear"></span>' . $depthHTML;
+                $depthHTML = '<span class="treeline-icon treeline-icon-clear"></span>' . $depthHTML;
             }
             $entry['depthHTML']=$depthHTML;
-            $iconFactory = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Core\Imaging\IconFactory::class);
-            $iconHtml=$iconFactory->getIconForRecord('pages', $entry, \TYPO3\CMS\Core\Imaging\Icon::SIZE_SMALL)->render();
-            $entry['iconWithLink'] = \TYPO3\CMS\Backend\Utility\BackendUtility::wrapClickMenuOnIcon($iconHtml, 'pages', $record['uid']);
+            $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+            $iconHtml = $iconFactory->getIconForRecord('pages', $entry, Icon::SIZE_SMALL)->render();
+            $entry['iconWithLink'] = BackendUtility::wrapClickMenuOnIcon($iconHtml, 'pages', $record['uid']);
             /*
              */
         }
     
         foreach ($this->fieldNamesToShow as $fieldName) {
             if ($entry['slugFieldValues'] &&  $record[$fieldName]) {
-                $entry['slugFieldValues'].=', ';
+                $entry['slugFieldValues'] .= ', ';
             }
             $entry['slugFieldValues'] .= $record[$fieldName];
-            $entry[$fieldName]=$record[$fieldName];
+            $entry[$fieldName] = $record[$fieldName];
         }
         return $entry;
     }

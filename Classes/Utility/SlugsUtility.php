@@ -2,10 +2,12 @@
 declare(strict_types = 1);
 namespace Ig\IgSlug\Utility;
 
+use Ig\IgSlug\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
+use TYPO3\CMS\Core\DataHandling\SlugEnricher;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Database\Query\Restriction\BackendWorkspaceRestriction;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
@@ -21,6 +23,8 @@ class SlugsUtility
     protected $countUpdates =0;
     protected $maxDepth =100;
     protected $siteLanguagesIds=[];
+
+
     /**
      * Instantiate the form protection before a simulated user is initialized.
      *
@@ -328,28 +332,41 @@ class SlugsUtility
         return $queryBuilder->execute();
     }
 
-  
-
-    public function getSlugTables()
+    public function getSlugTables(array $tableNames = [], $raiseError = true)
     {
         $slugTables=[];
         $lang = $this->getLanguageService();
-
-        $tableNames = array_flip(array_keys($GLOBALS['TCA']));
-        $slugEnricher=GeneralUtility::makeInstance(\TYPO3\CMS\Core\DataHandling\SlugEnricher::class);
-        foreach ($tableNames as $tableName => &$config) {
-            if ($tableName!='pages' || 1) {
-                $slugFields=$slugEnricher->resolveSlugFieldNames($tableName);
-                if (count($slugFields)
-                    && $GLOBALS['BE_USER']->check('non_exclude_fields', $tableName . ':' . $slugFields[0])) {
-                    $slugFieldName=$slugFields[0];
-                    $slugLockedFieldName= isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
-                    $slugTables[$tableName]=[
+        if (empty($tableNames)) {
+            $tableNames = array_keys($GLOBALS['TCA']);
+            $raiseError = false;
+        } else {
+            foreach($tableNames as $tableName) {
+                if (!isset($GLOBALS['TCA'][$tableName])) {
+                    throw new Exception\TableNotFoundException();
+                }
+            }
+        }
+        $slugEnricher = GeneralUtility::makeInstance(SlugEnricher::class);
+        foreach ($tableNames as $tableName) {
+            $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
+            if (count($slugFields)) {
+                if ($GLOBALS['BE_USER']->check('non_exclude_fields', $tableName . ':' . $slugFields[0])) {
+                    $slugFieldName = $slugFields[0];
+                    $slugLockedFieldName = isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
+                    $slugTables[$tableName] =  [
                         'table' => $tableName,
                         'slugFieldName' => $slugFieldName,
                         'slugLockedFieldName' => $slugLockedFieldName,
                         'title' => htmlspecialchars($lang->sL($GLOBALS['TCA'][$tableName]['ctrl']['title'])),
                     ];
+                } else {
+                    if ($raiseError) {
+                        throw new Exception\AccessDeniedException();
+                    }
+                }
+            } else {
+                if ($raiseError) {
+                    throw new Exception\SlugNotFoundException();
                 }
             }
         }

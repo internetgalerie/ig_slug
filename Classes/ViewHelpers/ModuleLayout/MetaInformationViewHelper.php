@@ -10,6 +10,7 @@ use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use TYPO3Fluid\Fluid\Core\ViewHelper\ViewHelperVariableContainer;
 use TYPO3\CMS\Backend\ViewHelpers\ModuleLayoutViewHelper;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3Fluid\Fluid\View\Exception;
 
@@ -38,7 +39,7 @@ class MetaInformationViewHelper extends AbstractViewHelper
         $moduleTemplate = $viewHelperVariableContainer->get(ModuleLayoutViewHelper::class, ModuleTemplate::class);
 
         if ($arguments['pageUid']) {
-            $moduleTemplate->getDocHeaderComponent()->setMetaInformation(\TYPO3\CMS\Backend\Utility\BackendUtility::readPageAccess($arguments['pageUid'], ''));
+            $moduleTemplate->getDocHeaderComponent()->setMetaInformation(BackendUtility::readPageAccess($arguments['pageUid'], ''));
         }
     }
 

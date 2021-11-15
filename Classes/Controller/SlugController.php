@@ -2,8 +2,8 @@
 declare(strict_types = 1);
 namespace Ig\IgSlug\Controller;
 
+use Ig\IgSlug\Utility\SlugsUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use \TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -15,6 +15,7 @@ use TYPO3Fluid\Fluid\View\Exception;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
@@ -31,9 +32,8 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     protected function init()
     {
         $this->id = (int)GeneralUtility::_GP('id');
-        $this->objectManager=GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\Object\ObjectManager::class);
         $this->initializeSiteLanguages();
-        $this->slugsUtility= $this->objectManager->get(\Ig\IgSlug\Utility\SlugsUtility::class, $this->siteLanguages);
+        $this->slugsUtility= GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
         $this->slugTables=$this->slugsUtility->getSlugTables();
         $this->perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
         if ($this->request->hasArgument('search')) {
@@ -84,7 +84,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->view->assign('filterMenus', $filterMenus);
         $this->view->assign('search', $this->search);
       
-        $fields=$this->slugsUtility->getSlugFields();
+        $fields = $this->slugsUtility->getSlugFields();
         $this->slugsUtility->setFieldNamesToShow($fields);
         $this->view->assign('fields', $fields);
         if ($this->update) {
@@ -95,7 +95,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
                 $pagesCount=$this->slugsUtility->populateSlugs($pageUids, $this->lang);
             }
 
-            $message=\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]);
+            $message = LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]);
             $flashMessage = GeneralUtility::makeInstance(
                 FlashMessage::class,
                 '',
@@ -168,7 +168,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
             $pagesCount=$this->slugsUtility->populateSlugs($pageUids, $this->lang);
         }
-        $this->addFlashMessage(\TYPO3\CMS\Extbase\Utility\LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
+        $this->addFlashMessage(LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
 
         $this->forward('list');
     }

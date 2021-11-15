@@ -11,3 +11,4 @@ services:
     tags:
       - name: 'console.command'
         command: 'ig_slug:update'
+        description: 'update slugs'
