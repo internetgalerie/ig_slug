@@ -1,53 +1,62 @@
-      <table class="table table-striped table-hover table-slug">
+<div class="collapse show mt-3 mb-4">
+  <div class="table-fit mb-0">
+    <table data-table="{activeTable}" class="table table-striped table-hover mb-0">
+      <thead>
 	<tr>
-	    <f:if condition="{activeTable}=='pages'">
-	      <f:else>
-		<th>UID</th>
-	      </f:else>
-	    </f:if>
-	  <th>
+	  <f:if condition="{activeTable}=='pages'">
+	    <f:else>
+	      <th class="nowrap">UID</th>
+	    </f:else>
+	  </f:if>
+	  <th class="nowrap">
 	    <f:for each="{fields}" as="field" iteration="i">
               <f:if condition="!{i.isFirst}">, </f:if>{field}
             </f:for>
 	  </th>
-	  <th><f:translate key="igSlug.oldSlug" /></th>
-	  <th><f:translate key="igSlug.newSlug" /></th>
-	  <th><f:translate key="igSlug.locked" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.oldSlug" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.newSlug" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.locked" /></th>
 	</tr>
+      </thead>
+      <tbody data-multi-record-selection-row-selection="true">
+
 	<f:for each="{entries}" as="entry" iteration="entryIterator">
 	  <f:if condition="{search.show}!=1 || {entry.updated}">
-	  <tr>
-	    <f:if condition="{activeTable}=='pages'">
-	      <f:then>
-		<td class="col-responsive col-nowrap">
-		  {entry.depthHTML->f:format.raw()}
-		  <f:if condition="{entry.depthLast}">
-		    <f:then><span class="treeline-icon treeline-icon-joinbottom"></span></f:then>
-		    <f:else><span class="treeline-icon treeline-icon-join"></span></f:else>
-		  </f:if>
-		  <span title="id={entry.uid}" alt="id={entry.uid}">{entry.iconWithLink->f:format.raw()}</span>
-		  <f:comment><span title="id={entry.uid}" alt="id={entry.uid}"><core:iconForRecord table="{activeTable}" row="{entry}" /></span></f:comment>
-		  <f:if condition="{entry.sys_language_uid} && !{search.lang}"><core:icon identifier="{entry.flag}" /></f:if>
-		  <span> {entry.slugFieldValues}</span>
-		</td>
-	      </f:then>
-	      <f:else>
-		<td class="col-responsive">{entry.uid}</td>
-		<td class="col-responsive">{entry.slugFieldValues}</td>
-	      </f:else>
-	    </f:if>
-	    <f:if condition="{entry.slugLocked} || !{entry.updated}">
-	      <f:then>
-		<td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
-		<td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
-	      </f:then>
-	      <f:else>
-		<td class="diff-item-result col-responsive col-slug"><del>{entry.slug}</del></td>
-		<td class="diff-item-result col-responsive col-slug"><ins>{entry.newSlug}</ins></td>
-	      </f:else>
-	    </f:if>
-	    <td class="col-center">{entry.slugLocked}</td>
-	  </tr>
+	    <tr class="t3js-entity" data-table="{activeTable}" title="id=1" data-uid="{entry.uid}" data-l10nparent="0">
+
+	      <f:if condition="{activeTable}=='pages'">
+		<f:then>
+		  <td class="col-responsive nowrap">
+		    {entry.depthHTML->f:format.raw()}
+		    <f:if condition="{entry.depthLast}">
+		      <f:then><span class="treeline-icon treeline-icon-joinbottom"></span></f:then>
+		      <f:else><span class="treeline-icon treeline-icon-join"></span></f:else>
+		    </f:if>
+		    <span title="id={entry.uid}" alt="id={entry.uid}">{entry.iconWithLink->f:format.raw()}</span>
+		    <f:if condition="{entry.sys_language_uid} && !{search.lang}"><core:icon identifier="{entry.flag}" /></f:if>
+		    <span> {entry.slugFieldValues}</span>
+		  </td>
+		</f:then>
+		<f:else>
+		  <td class="nowrap">{entry.uid}</td>
+		  <td class="col-responsive">{entry.slugFieldValues}</td>
+		</f:else>
+	      </f:if>
+	      <f:if condition="{entry.slugLocked} || !{entry.updated}">
+		<f:then>
+		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
+		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
+		</f:then>
+		<f:else>
+		  <td class="diff-item-result col-responsive col-slug"><del>{entry.slug}</del></td>
+		  <td class="diff-item-result col-responsive col-slug"><ins>{entry.newSlug}</ins></td>
+		</f:else>
+	      </f:if>
+	      <td class="col-center">{entry.slugLocked}</td>
+	    </tr>
 	  </f:if>
 	</f:for>
-      </table>
+      </tbody>
+    </table>
+  </div>
+</div>

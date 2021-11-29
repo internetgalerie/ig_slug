@@ -11,6 +11,7 @@ use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
 use TYPO3\CMS\Core\Page\PageRenderer;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 use TYPO3Fluid\Fluid\View\Exception;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -149,7 +150,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->view->assign('entries', $entries);
         $this->view->assign('slugTables', $this->slugTables);
         $this->view->assign('activeTable', $this->activeTable);
-
         $this->view->assign('pageUid', $this->id);
     }
 
@@ -198,6 +198,14 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $menuArray['lang'] = [];
         foreach ($this->siteLanguages as $language) {
             $menuArray['lang'][$language->getLanguageId()] = $language->getTitle();
+        }
+        // compatibilty partial for typo3 10.4
+        if (VersionNumberUtility::convertVersionNumberToInteger(VersionNumberUtility::getNumericTypo3Version()) >= 11000000) {
+            $menuArray['partialFilter'] = 'Filters';
+            $menuArray['partialListEntries'] = 'ListEntries';
+        } else {
+            $menuArray['partialFilter'] = 'Compatibility10/Filters';
+            $menuArray['partialListEntries'] = 'Compatibility10/ListEntries';            
         }
         return $menuArray;
     }

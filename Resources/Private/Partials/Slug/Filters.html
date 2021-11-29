@@ -1,12 +1,14 @@
-	  <div class="form-group">
-	    <f:form.select name="search[table]" value="{search.table}" options="{slugTables}" optionLabelField="title" optionValueField="table" class="form-control input-sm form-ig-slug-filter" />
-	  </div>
-	  <div class="form-group">
-	  <f:form.select name="search[depth]" value="{search.depth}" options="{filterMenus.depth}" class="form-control input-sm form-ig-slug-filter" />
-	  </div>
-	  <div class="form-group">
-	    <f:form.select name="search[lang]" value="{search.lang}" options="{filterMenus.lang}" class="form-control input-sm form-ig-slug-filter" prependOptionLabel="" prependOptionValue="" />
-	  </div>
-	  <div class="form-group">
-	    <f:form.select name="search[show]" value="{search.show}" options="{filterMenus.show}" class="form-control input-sm form-ig-slug-filter" />
-	  </div>
+<div class="row row-cols-1 row-cols-md-auto">
+  <div class="col-form-label">
+    <f:form.select name="search[table]" value="{search.table}" options="{slugTables}" optionLabelField="title" optionValueField="table" class="form-select form-ig-slug-filter" />
+  </div>
+  <div class="col-form-label">
+    <f:form.select name="search[depth]" value="{search.depth}" options="{filterMenus.depth}" class="form-select form-ig-slug-filter" />
+  </div>
+  <div class="col-form-label">
+    <f:form.select name="search[lang]" value="{search.lang}" options="{filterMenus.lang}" class="form-select form-ig-slug-filter" prependOptionLabel="" prependOptionValue="" />
+  </div>
+  <div class="col-form-label">
+    <f:form.select name="search[show]" value="{search.show}" options="{filterMenus.show}" class="form-select form-ig-slug-filter" />
+  </div>
+</div>

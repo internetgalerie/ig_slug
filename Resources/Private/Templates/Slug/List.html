@@ -19,13 +19,13 @@
 	</f:for>
       </div>
 
-      <div class="form-inline form-inline-spaced">
+      <div class="form-inline">
 	<f:form id="ig_slug_filters" action="list" class="form-inline form-inline-spaced">
-	  <f:render partial="Slug/Filters" arguments="{_all}" />
+	  <f:render partial="Slug/{filterMenus.partialFilter}" arguments="{_all}" />
 	</f:form>
       </div>
 
-      <f:render partial="Slug/ListEntries" arguments="{_all}" />
+      <f:render partial="Slug/{filterMenus.partialListEntries}" arguments="{_all}" />
 
       <a class="btn btn-danger" href="javascript:void(0)" onclick="TYPO3.Confirm.dialog(TYPO3.lang['igSlug.confirm.title'], TYPO3.lang['igSlug.confirm.message'],
 								   '{f:uri.action(controller: 'Slug', action: 'update', arguments: '{search: search}')}')">
