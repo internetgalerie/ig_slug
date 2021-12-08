@@ -9,7 +9,14 @@ call_user_func(
             )->get('ig_slug');
 
             // drop on final TYPO3 11 release
-            $controllerName = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getNumericTypo3Version()) >= 10000000 ? \Ig\IgSlug\Controller\SlugController::class : 'Slug';
+            $typo3VersionNumberInteger = \TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(\TYPO3\CMS\Core\Utility\VersionNumberUtility::getNumericTypo3Version());
+
+            $controllerName = $typo3VersionNumberInteger >= 10000000 ? \Ig\IgSlug\Controller\SlugController::class : 'Slug';
+
+            // since TYPO3 11: extensionName without vendor name
+            // (see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.0/Breaking-92609-UseControllerClassesWhenRegisteringPluginsmodules.html)
+            $extensionName = $typo3VersionNumberInteger >= 10000000 ? 'IgSlug' : 'Ig.IgSlug';
+
             if (isset($extConf['disableOwnMenuItem']) && $extConf['disableOwnMenuItem']==1) {
                 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::insertModuleFunction(
                     'web_info',
@@ -19,13 +26,13 @@ call_user_func(
                 );
             } else {
                 \TYPO3\CMS\Extbase\Utility\ExtensionUtility::registerModule(
-                    'Ig.IgSlug',
+                    $extensionName,
                     'web', // Make module a submodule of 'web'
                     'rebuild', // Submodule key
                     '', // Position
                     [
                         $controllerName => 'list, update',
-                    
+
                     ],
                     [
                         'access' => 'user,group',
