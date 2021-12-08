@@ -15,7 +15,7 @@ call_user_func(
 
             // since TYPO3 11: extensionName without vendor name
             // (see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.0/Breaking-92609-UseControllerClassesWhenRegisteringPluginsmodules.html)
-            $extensionName = $typo3VersionNumberInteger >= 10000000 ? 'IgSlug' : 'Ig.IgSlug';
+            $extensionName = $typo3VersionNumberInteger >= 11000000 ? 'IgSlug' : 'Ig.IgSlug';
 
             if (isset($extConf['disableOwnMenuItem']) && $extConf['disableOwnMenuItem']==1) {
                 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::insertModuleFunction(
