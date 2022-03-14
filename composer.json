@@ -31,7 +31,6 @@
         }
     },
     "replace": {
-        "internetgalerie/ig-slug": "self.version",
         "typo3-ter/ig-slug": "self.version"
     },
     "extra": {
