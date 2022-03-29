@@ -58,7 +58,12 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
 
         $this->lang = isset($this->search['lang'])  && $this->search['lang']!='' ? intval($this->search['lang']) : null;
-        $this->depth = isset($this->search['depth']) ? intval($this->search['depth']) : 0;
+        
+        $this->extConf = GeneralUtility::makeInstance(
+            \TYPO3\CMS\Core\Configuration\ExtensionConfiguration::class
+        )->get('ig_slug');
+        $this->defaultInfiniteDepth = ($this->extConf['defaultInfiniteDepth'] == 1) ? 999 : 0;
+        $this->depth = isset($this->search['depth']) ? intval($this->search['depth']) : $this->defaultInfiniteDepth;
 
 
         $this->slugsUtility->setTable($this->slugTable['table']);
