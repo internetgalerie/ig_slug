@@ -16,7 +16,7 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 class SlugsUtility
 {
     protected $table = 'pages';
-  
+
     protected $slugFieldName = 'slug';
     protected $slugLockedFieldName = 'slug_locked';
     protected $fieldNamesToShow = ['title'];
@@ -49,7 +49,7 @@ class SlugsUtility
     {
         $this->table=$table;
     }
-  
+
     public function setSlugFieldName($slugFieldName)
     {
         $this->slugFieldName=$slugFieldName;
@@ -62,7 +62,7 @@ class SlugsUtility
     {
         $this->fieldNamesToShow=$fieldNamesToShow;
     }
-  
+
     public function populateSlugsAll(int $lang=null)
     {
         $this->doSlugsAll(true, $lang);
@@ -93,7 +93,7 @@ class SlugsUtility
      */
     public function doSlugs(array $uids, bool $doUdpates=false, bool $recursive=false, int $maxDepth=100, int $lang=null) :array
     {
-        if (!$GLOBALS['BE_USER']->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)) {
+        if (isset($GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude']) && !$GLOBALS['BE_USER']->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)) {
             return [];
         }
         if (count($uids)==0) {
@@ -106,7 +106,7 @@ class SlugsUtility
         }
         $this->maxDepth=$maxDepth;
         $this->countUpdates=0;
-      
+
         $entries=[];
 
         $this->slugUtility = GeneralUtility::makeInstance(SlugUtility::class, $this->table, $this->slugFieldName, $this->slugLockedFieldName, $this->fieldNamesToShow);
@@ -154,7 +154,7 @@ class SlugsUtility
 
 
 
-  
+
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
@@ -189,7 +189,7 @@ class SlugsUtility
     }
 
 
-  
+
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
@@ -217,7 +217,7 @@ class SlugsUtility
 
 
 
-  
+
     public function getSlugFields()
     {
         $fields=[];
@@ -242,7 +242,7 @@ class SlugsUtility
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-    
+
         $queryBuilder->select('*')
             ->from($this->table);
         if ($this->table=='pages') {
@@ -305,14 +305,14 @@ class SlugsUtility
             ->addOrderBy('sorting', 'asc')
             ->execute();
     }
-  
+
 
     protected function getStatementAll(int $lang=null)
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-    
+
         $queryBuilder->select('*')
             ->from($this->table);
         // only show entries with the correct language
@@ -328,7 +328,7 @@ class SlugsUtility
         if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
-        
+
         return $queryBuilder->execute();
     }
 
@@ -350,7 +350,7 @@ class SlugsUtility
         foreach ($tableNames as $tableName) {
             $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
             if (count($slugFields)) {
-                if ($GLOBALS['BE_USER']->check('non_exclude_fields', $tableName . ':' . $slugFields[0])) {
+                if (! isset($GLOBALS['TCA'][$tableName]['columns'][$slugFields[0]]['exclude']) || $GLOBALS['BE_USER']->check('non_exclude_fields', $tableName . ':' . $slugFields[0])) {
                     $slugFieldName = $slugFields[0];
                     $slugLockedFieldName = isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
                     $slugTables[$tableName] =  [
@@ -375,7 +375,7 @@ class SlugsUtility
 
 
 
-  
+
     public function getPageRecordsRecursive(int $pid, int $depth, array $rows = []): array
     {
         $depth--;
@@ -392,11 +392,11 @@ class SlugsUtility
                 $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)),
                 $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)
             );
-      
+
         if (!empty($GLOBALS['TCA']['pages']['ctrl']['sortby'])) {
             $queryBuilder->orderBy($GLOBALS['TCA']['pages']['ctrl']['sortby']);
         }
-      
+
         if ($depth >= 0) {
             $result = $queryBuilder->execute();
             $rowCount = $queryBuilder->count('uid')->execute()->fetchColumn(0);
