@@ -21,6 +21,7 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3\CMS\Backend\Template\ModuleTemplate;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 
 class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 {
@@ -34,6 +35,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     {
         $this->id = (int)GeneralUtility::_GP('id');
         $this->initializeSiteLanguages();
+        $this->extConf = GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('ig_slug');
         $this->slugsUtility= GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
         $this->slugTables=$this->slugsUtility->getSlugTables();
         $this->perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
@@ -58,6 +60,8 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
 
         $this->lang = isset($this->search['lang'])  && $this->search['lang']!='' ? intval($this->search['lang']) : null;
+        
+        $this->search['depth'] = (!isset($this->search['depth']) && $this->extConf['defaultInfiniteDepth'] == 1) ? 999 : $this->search['depth'];
         $this->depth = isset($this->search['depth']) ? intval($this->search['depth']) : 0;
 
 
