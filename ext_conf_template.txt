@@ -1,2 +1,4 @@
   # cat=basic/enable; type=boolean; label=Show in info module:Disable own menu item and add it to info module
 disableOwnMenuItem = 0
+  # cat=basic/enable; type=boolean; label=Default infinite depth:Select infinite depth by default
+defaultInfiniteDepth = 1
