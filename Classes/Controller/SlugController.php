@@ -1,44 +1,85 @@
 <?php
 declare(strict_types = 1);
+
 namespace Ig\IgSlug\Controller;
 
 use Ig\IgSlug\Utility\SlugsUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Psr\Http\Message\ResponseInterface;
+use TYPO3\CMS\Backend\Module\ModuleData;
+use TYPO3\CMS\Backend\Routing\UriBuilder as BackendUriBuilder;
+use TYPO3\CMS\Backend\Template\ModuleTemplate;
+use TYPO3\CMS\Backend\Template\ModuleTemplateFactory;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
-use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
-use TYPO3\CMS\Core\DataHandling\SlugHelper;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Http\ForwardResponse;
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use TYPO3Fluid\Fluid\View\Exception;
 
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
-use TYPO3\CMS\Backend\Template\ModuleTemplate;
-use TYPO3\CMS\Core\Messaging\FlashMessage;
-use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
+
 
 class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 {
-    protected $search=[];
-    protected $depth=0; // get from .....
+    protected array $search = [];
+    protected int $depth = 0; // get from .....
+    protected ?ModuleData $moduleData = null;
+    protected ModuleTemplate $moduleTemplate;
 
+    
+    public function __construct(
+        protected readonly ModuleTemplateFactory $moduleTemplateFactory,
+        protected readonly BackendUriBuilder $backendUriBuilder,
+        protected readonly PageRenderer $pageRenderer,
+    ) {
+    }
+
+    /**
+     * Init module state.
+     * This isn't done within __construct() since the controller
+     * object is only created once in extbase when multiple actions are called in
+     * one call. When those change module state, the second action would see old state.
+     */
+    public function initializeAction(): void
+    {
+        $this->moduleData = $this->request->getAttribute('moduleData');
+        $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
+        $this->moduleTemplate->setTitle(LocalizationUtility::translate('LLL:EXT:ig_slug/Resources/Private/Language/locallang_rebuild.xlf:mlang_labels_tablabel'));
+        $this->moduleTemplate->setFlashMessageQueue($this->getFlashMessageQueue());
+    }
+
+
+    /**
+     * Assign default variables to ModuleTemplate view
+     */
+    protected function initializeView(): void
+    {
+        // Load requireJS modules, CSS
+        $this->pageRenderer->loadJavaScriptModule('@typo3/backend/modal.js');
+        $this->pageRenderer->loadJavaScriptModule('@typo3/backend/context-menu.js');
+        $this->pageRenderer->loadJavaScriptModule('@ig/igslug/slug-confirm.js');
+        $this->pageRenderer->addCssFile('EXT:ig_slug/Resources/Public/Css/ig_slug_be.css');
+        //$this->pageRenderer->addInlineLanguageLabelFile('EXT:lang/Resources/Private/Language/locallang_core.xlf');
+        //$this->pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
+    }
+    
     /**
      * Initializes the backend module by setting internal variables, initializing the menu.
      */
-    protected function init()
+    protected function init(): void
     {
-        $this->id = (int)GeneralUtility::_GP('id');
+        $this->id = (int)($this->request->getQueryParams()['id'] ?? $this->request->getParsedBody()['id'] ?? 0);
         $this->initializeSiteLanguages();
-        $this->slugsUtility= GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
-        $this->slugTables=$this->slugsUtility->getSlugTables();
-        $this->perms_clause = $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW);
+        $this->slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
+
+        $this->slugTables = $this->slugsUtility->getSlugTables();
         if ($this->request->hasArgument('search')) {
             $this->search = $this->request->getArgument('search');
+        } else {
+            $this->search = (array)$this->moduleData->get('search', []);
         }
 
     
@@ -47,79 +88,18 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             if (!isset($this->slugTables[$activeTable])) {
                 throw new Exception(sprintf('access rights are missing on "%s"', $activeTable), 1549656272);
             }
-            $this->slugTable=$this->slugTables[$activeTable];
+            $this->slugTable = $this->slugTables[$activeTable];
         } else {
-            $this->slugTable=reset($this->slugTables);
+            $this->slugTable = reset($this->slugTables);
         }
-        $this->activeTable=$this->slugTable['table'];
-        // Why not in PageRendererViewHelper.php argument addInlineLanguageLabelFile
-        $pageRenderer=GeneralUtility::makeInstance(PageRenderer::class);
-        $pageRenderer->addInlineLanguageLabelFile('EXT:lang/Resources/Private/Language/locallang_core.xlf');
-        $pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
+        $this->activeTable = $this->slugTable['table'];
 
-        $this->lang = isset($this->search['lang'])  && $this->search['lang']!='' ? intval($this->search['lang']) : null;
+        $this->lang = isset($this->search['lang'])  && $this->search['lang'] != '' ? intval($this->search['lang']) : null;
         $this->depth = isset($this->search['depth']) ? intval($this->search['depth']) : 0;
-
 
         $this->slugsUtility->setTable($this->slugTable['table']);
         $this->slugsUtility->setSlugFieldName($this->slugTable['slugFieldName']);
         $this->slugsUtility->setSlugLockedFieldName($this->slugTable['slugLockedFieldName']);
-    
-        // $BE_USER->check('tables_modify', 'pages');
-        //$BE_USER->check('non_exclude_fields', this->table . ':' . $this->fieldName);
-    }
-    public function main()
-    {
-        $this->view = $this->getFluidTemplateObject();
-        $this->search = GeneralUtility::_GP('search');
-        $this->update=(int)GeneralUtility::_GP('update');
-        $this->init();
-        $this->moduleTemplate = GeneralUtility::makeInstance(ModuleTemplate::class);
-        $this->moduleTemplate->getPageRenderer()->loadRequireJsModule('TYPO3/CMS/Backend/Modal');
-        $this->moduleTemplate->getPageRenderer()->loadRequireJsModule('TYPO3/CMS/IgSlug/Confirm');
-        $this->moduleTemplate->getPageRenderer()->addCssFile('EXT:ig_slug/Resources/Public/Css/ig_slug_be.css');
-        $tableTitle = $this->slugTable['title'];
-      
-        $filterMenus=$this->modMenu();
-
-        $this->view->assign('filterMenus', $filterMenus);
-        $this->view->assign('search', $this->search);
-      
-        $fields = $this->slugsUtility->getSlugFields();
-        $this->slugsUtility->setFieldNamesToShow($fields);
-        $this->view->assign('fields', $fields);
-        if ($this->update) {
-            if ($this->slugTable['table']=='pages') {
-                $pagesCount=$this->slugsUtility->populateSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
-            } else {
-                $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
-                $pagesCount=$this->slugsUtility->populateSlugs($pageUids, $this->lang);
-            }
-
-            $message = LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]);
-            $flashMessage = GeneralUtility::makeInstance(
-                FlashMessage::class,
-                '',
-                $message,
-                FlashMessage::OK
-            );
-            $flashMessageService = GeneralUtility::makeInstance(FlashMessageService::class);
-            $defaultFlashMessageQueue = $flashMessageService->getMessageQueueByIdentifier();
-            $defaultFlashMessageQueue->enqueue($flashMessage);
-        }
-        if ($this->slugTable['table']=='pages') {
-            $entries=$this->slugsUtility->viewSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
-        } else {
-            $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
-            $entries=$this->slugsUtility->viewSlugs($pageUids, $this->lang);
-        }
-      
-        $this->view->assign('entries', $entries);
-        $this->view->assign('slugTables', $this->slugTables);
-        $this->view->assign('activeTable', $this->activeTable);
-      
-        $this->view->assign('pageUid', $this->id);
-        return $this->view->render();
     }
     
     /*
@@ -127,30 +107,72 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
      *
      * @return void
      */
-    public function listAction()
+    public function listAction(): ResponseInterface
     {
         $this->init();
-        $tableTitle = $this->slugTable['title'];
+        $this->moduleData->set('search', $this->search);
 
-        $filterMenus=$this->modMenu();
-        $this->view->assign('filterMenus', $filterMenus);
-        $this->view->assign('search', $this->search);
+        $this->getBackendUser()->pushModuleData($this->moduleData->getModuleIdentifier(), $this->moduleData->toArray());
+
+        $filterMenus = $this->modMenu();
     
-        $fields=$this->slugsUtility->getSlugFields();
+        $fields = $this->slugsUtility->getSlugFields();
         $this->slugsUtility->setFieldNamesToShow($fields);
-        $this->view->assign('fields', $fields);
 
-        if ($this->slugTable['table']=='pages') {
-            $entries=$this->slugsUtility->viewSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
+        if ($this->slugTable['table'] == 'pages') {
+            $entries = $this->slugsUtility->viewSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
         } else {
-            $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
-            $entries=$this->slugsUtility->viewSlugs($pageUids, $this->lang);
+            $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
+            $entries = $this->slugsUtility->viewSlugs($pageUids, $this->lang);
         }
-    
-        $this->view->assign('entries', $entries);
-        $this->view->assign('slugTables', $this->slugTables);
-        $this->view->assign('activeTable', $this->activeTable);
-        $this->view->assign('pageUid', $this->id);
+
+        // show pageinfo in header right
+        $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)) ?: [];
+        // The page will show only if there is a valid page and if this page
+        // may be viewed by the user
+        if ($this->pageinfo !== []) {
+            $this->moduleTemplate->getDocHeaderComponent()->setMetaInformation($this->pageinfo);
+        }
+
+        // own menu item or subitem of web info
+        $disableOwnMenuItem = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('ig_slug')['disableOwnMenuItem'] ?? 0);        
+        if ($disableOwnMenuItem) {
+            // show menu in web info module
+            $this->moduleTemplate->makeDocHeaderModuleMenu(['id' => $this->id]);
+            $routeName = 'web_info_IgSlug';
+        } else {
+            $routeName = 'web_IgSlug';
+        }
+
+        
+        $this->moduleTemplate->assignMultiple([
+            'search' => $this->search,
+            'filterMenus' => $filterMenus,
+            'fields' => $fields,
+            'entries' => $entries,
+            'slugTables' => $this->slugTables,
+            'activeTable' => $this->activeTable,
+            'pageUid' => $this->id,
+            'rebuildUrl' => $this->backendUriBuilder->buildUriFromRoute($routeName, [
+                'id' => $this->id,
+                'search' => $this->search,
+                'action' => 'update',
+            ]),
+        ]);
+        /*
+        // as main menu
+        $this->uriBuilder->setRequest($this->request);
+        $menu = $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
+        $menu->setIdentifier('IgSlugModuleMenu');
+        $menu->addMenuItem(
+            $menu->makeMenuItem()
+                 ->setTitle(LocalizationUtility::translate('LLL:EXT:ig_slug/Resources/Private/Language/locallang.xlf:igSlug.populateSlug', 'ig_slug'))
+                 ->setHref($this->uriBuilder->uriFor('update'))
+                 ->setActive(true)
+        );
+        $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
+        */
+        return $this->moduleTemplate->renderResponse('Slug/List');
     }
 
       
@@ -159,18 +181,18 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
      *
      * @return void
      */
-    public function updateAction()
+    public function updateAction(): ResponseInterface
     {
         $this->init();
-        if ($this->activeTable=='pages') {
-            $pagesCount=$this->slugsUtility->populateSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
+        if ($this->activeTable == 'pages') {
+            $pagesCount = $this->slugsUtility->populateSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
         } else {
-            $pageUids=$this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
-            $pagesCount=$this->slugsUtility->populateSlugs($pageUids, $this->lang);
+            $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
+            $pagesCount = $this->slugsUtility->populateSlugs($pageUids, $this->lang);
         }
-        $this->addFlashMessage(LocalizationUtility::translate($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
+        $this->addFlashMessage(LocalizationUtility::translate($pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
 
-        $this->forward('list');
+        return new ForwardResponse('list');
     }
 
 
@@ -199,36 +221,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         foreach ($this->siteLanguages as $language) {
             $menuArray['lang'][$language->getLanguageId()] = $language->getTitle();
         }
-        // compatibilty partial for typo3 10.4
-        if (VersionNumberUtility::convertVersionNumberToInteger(VersionNumberUtility::getNumericTypo3Version()) >= 11000000) {
-            $menuArray['partialFilter'] = 'Filters';
-            $menuArray['partialListEntries'] = 'ListEntries';
-        } else {
-            $menuArray['partialFilter'] = 'Compatibility10/Filters';
-            $menuArray['partialListEntries'] = 'Compatibility10/ListEntries';            
-        }
         return $menuArray;
-    }
-
-    /**
-     * returns a new standalone view, shorthand function
-     *
-     * @return StandaloneView
-     */
-    protected function getFluidTemplateObject()
-    {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setLayoutRootPaths([GeneralUtility::getFileAbsFileName('EXT:ig_slug/Resources/Private/Layouts')]);
-        $view->setPartialRootPaths([GeneralUtility::getFileAbsFileName('EXT:ig_slug/Resources/Private/Partials')]);
-        $view->setTemplateRootPaths([GeneralUtility::getFileAbsFileName('EXT:ig_slug/Resources/Private/Templates')]);
-
-        $view->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName('EXT:ig_slug/Resources/Private/Templates/Slug/Index.html'));
-
-        $view->getRequest()->setControllerExtensionName('ig_slug');
-        $this->request=$view->getRequest();
-        $this->id = (int)GeneralUtility::_GP('id');
-
-        return $view;
     }
 
  

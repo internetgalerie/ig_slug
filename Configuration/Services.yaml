@@ -7,8 +7,12 @@ services:
   Ig\IgSlug\:
     resource: '../Classes/*'
 
+#  Ig\IgSlug\Controller\SlugController:
+#    tags: ['backend.controller']
+
   Ig\IgSlug\Command\UpdateCommand:
     tags:
       - name: 'console.command'
         command: 'ig_slug:update'
         description: 'update slugs'
+

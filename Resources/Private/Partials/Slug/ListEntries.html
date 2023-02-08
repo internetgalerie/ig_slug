@@ -13,16 +13,16 @@
               <f:if condition="!{i.isFirst}">, </f:if>{field}
             </f:for>
 	  </th>
-	  <th class="nowrap"><f:translate key="igSlug.oldSlug" /></th>
-	  <th class="nowrap"><f:translate key="igSlug.newSlug" /></th>
-	  <th class="nowrap"><f:translate key="igSlug.locked" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.oldSlug" extensionName="IgSlug" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.newSlug" extensionName="IgSlug" /></th>
+	  <th class="nowrap"><f:translate key="igSlug.locked" extensionName="IgSlug" /></th>
 	</tr>
       </thead>
       <tbody data-multi-record-selection-row-selection="true">
 
 	<f:for each="{entries}" as="entry" iteration="entryIterator">
 	  <f:if condition="{search.show}!=1 || {entry.updated}">
-	    <tr class="t3js-entity" data-table="{activeTable}" title="id=1" data-uid="{entry.uid}" data-l10nparent="0">
+	    <tr class="t3js-entity" data-table="{activeTable}" title="id={entry.uid}" data-uid="{entry.uid}" data-l10nparent="0">
 
 	      <f:if condition="{activeTable}=='pages'">
 		<f:then>

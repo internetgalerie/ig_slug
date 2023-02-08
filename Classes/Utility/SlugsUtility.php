@@ -2,27 +2,30 @@
 declare(strict_types = 1);
 namespace Ig\IgSlug\Utility;
 
+use Doctrine\DBAL\Result;
 use Ig\IgSlug\Exception;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\Query\Restriction\BackendWorkspaceRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugEnricher;
 use TYPO3\CMS\Core\DataHandling\SlugHelper;
-use TYPO3\CMS\Core\Database\Query\Restriction\BackendWorkspaceRestriction;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SlugsUtility
 {
-    protected $table = 'pages';
+    protected string $table = 'pages';
   
-    protected $slugFieldName = 'slug';
-    protected $slugLockedFieldName = 'slug_locked';
-    protected $fieldNamesToShow = ['title'];
-    protected $countUpdates =0;
-    protected $maxDepth =100;
-    protected $siteLanguagesIds=[];
+    protected string $slugFieldName = 'slug';
+    protected ?string $slugLockedFieldName = 'slug_locked';
+    protected array $fieldNamesToShow = ['title'];
+    protected int $countUpdates = 0;
+    protected int $maxDepth = 100;
+    protected array $siteLanguagesIds = [];
 
 
     /**
@@ -37,53 +40,53 @@ class SlugsUtility
             $this->siteLanguagesIds[]=$language->getLanguageId();
         }
     }
-    public function getLanguageIds()
+    public function getLanguageIds(): array
     {
         return $this->siteLanguagesIds;
     }
-    public function hasLanguageId($languageId)
+    public function hasLanguageId(int $languageId): bool
     {
         return in_array($languageId, $this->siteLanguagesIds);
     }
-    public function setTable($table)
+    public function setTable(string $table): void
     {
-        $this->table=$table;
+        $this->table = $table;
     }
   
-    public function setSlugFieldName($slugFieldName)
+    public function setSlugFieldName(string $slugFieldName): void
     {
-        $this->slugFieldName=$slugFieldName;
+        $this->slugFieldName = $slugFieldName;
     }
-    public function setSlugLockedFieldName($slugLockedFieldName)
+    public function setSlugLockedFieldName(?string $slugLockedFieldName): void
     {
-        $this->slugLockedFieldName=$slugLockedFieldName;
+        $this->slugLockedFieldName = $slugLockedFieldName;
     }
-    public function setFieldNamesToShow($fieldNamesToShow)
+    public function setFieldNamesToShow(array $fieldNamesToShow): void
     {
-        $this->fieldNamesToShow=$fieldNamesToShow;
+        $this->fieldNamesToShow = $fieldNamesToShow;
     }
   
-    public function populateSlugsAll(int $lang=null)
+    public function populateSlugsAll(int $lang = null): int
     {
         $this->doSlugsAll(true, $lang);
         return $this->countUpdates;
     }
 
-    public function populateSlugs(array $uids, int $lang=null)
+    public function populateSlugs(array $uids, int $lang = null): int
     {
         $this->doSlugs($uids, true, false, 1, $lang);
         return $this->countUpdates;
     }
-    public function populateSlugsByUidRecursive(array $uids, int $depth, int $lang=null)
+    public function populateSlugsByUidRecursive(array $uids, int $depth, int $lang = null): int
     {
         $this->doSlugs($uids, true, true, $depth, $lang);
         return $this->countUpdates;
     }
-    public function viewSlugs(array $uids, int $lang=null)
+    public function viewSlugs(array $uids, int $lang = null): array
     {
         return $this->doSlugs($uids, false, false, 1, $lang);
     }
-    public function viewSlugsByUidRecursive(array $uids, int $depth, int $lang=null)
+    public function viewSlugsByUidRecursive(array $uids, int $depth, int $lang = null): array
     {
         return $this->doSlugs($uids, false, true, $depth, $lang);
     }
@@ -91,27 +94,27 @@ class SlugsUtility
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
-    public function doSlugs(array $uids, bool $doUdpates=false, bool $recursive=false, int $maxDepth=100, int $lang=null) :array
+    public function doSlugs(array $uids, bool $doUdpates=false, bool $recursive=false, int $maxDepth = 100, int $lang = null) :array
     {
         if (!$GLOBALS['BE_USER']->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)) {
             return [];
         }
-        if (count($uids)==0) {
+        if (count($uids) == 0) {
             return [];
         }
         foreach ($uids as $uid) {
-            if ($uid==0) {
+            if ($uid == 0) {
                 return [];
             }
         }
-        $this->maxDepth=$maxDepth;
-        $this->countUpdates=0;
+        $this->maxDepth = $maxDepth;
+        $this->countUpdates = 0;
       
-        $entries=[];
+        $entries = [];
 
         $this->slugUtility = GeneralUtility::makeInstance(SlugUtility::class, $this->table, $this->slugFieldName, $this->slugLockedFieldName, $this->fieldNamesToShow);
 
-        if ($this->table=='pages') {
+        if ($this->table == 'pages') {
             return $this->doSlugsByUid($uids, $doUdpates, $recursive, 0, $lang);
         } else {
             return $this->doSlugsByPid($uids, $doUdpates, $recursive, 0, $lang, false);
@@ -123,17 +126,24 @@ class SlugsUtility
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
-    public function doSlugsByUid(array $uids, bool $doUdpates=false, bool $recursive=false, int $depth=10, int $lang=null) :array
+    public function doSlugsByUid(array $uids, bool $doUdpates = false, bool $recursive = false, int $depth = 10, int $lang = null) :array
     {
-        $entries=[];
-        $recursiveEntries=[];
-        $statement = $this->getStatementByUid($uids, $lang);
-        while ($record = $statement->fetch()) {
-            $hasUpdate=false;
-            if ($this->table!='pages' || ($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
+        $entries = [];
+        $recursiveEntries = [];
+        $pageRows = $this->getStatementByUid($uids, $lang);
+        foreach($pageRows as $record) {
+            $hasUpdate = false;
+            if (
+                $this->table != 'pages' ||
+                (
+                    $GLOBALS['TCA'][$this->table]['ctrl']['languageField']
+                    && ($lang === null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] == $lang)
+                    && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']])
+                )
+            ) {
                 //die($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] .'='. $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] .' mit '. print_r($this->siteLanguagesIds,true). '='. $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]));
                 $entry = $this->slugUtility->getEntryByRecord($record, $depth);
-                $hasUpdate=$entry['updated'];
+                $hasUpdate = $entry['updated'];
                 if ($doUdpates && $entry['updated']) {
                     $this->countUpdates++;
                     $this->slugUtility->updateEntry($entry);
@@ -141,11 +151,11 @@ class SlugsUtility
                 $entries[] = $entry;
             }
             if ($recursive) {
-                $subentries=$this->doSlugsByPid([$record['uid']], $doUdpates, $recursive, $depth+1, $lang, $hasUpdate);
+                $subentries = $this->doSlugsByPid([$record['uid']], $doUdpates, $recursive, $depth + 1, $lang, $hasUpdate);
                 if (count($subentries)) {
-                    $subentries[count($subentries)-1]['depthLast']=true; // mark for easy output
+                    $subentries[count($subentries) - 1]['depthLast'] = true; // mark for easy output
                 }
-                $recursiveEntries=array_merge($recursiveEntries, $subentries);
+                $recursiveEntries = array_merge($recursiveEntries, $subentries);
             }
         }
         return array_merge($entries, $recursiveEntries);
@@ -158,9 +168,9 @@ class SlugsUtility
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
-    public function doSlugsByPid(array $uids, bool $doUdpates=false, bool $recursive=false, int $depth=0, int $lang=null, bool $parentHasUpdates=false) :array
+    public function doSlugsByPid(array $uids, bool $doUdpates = false, bool $recursive = false, int $depth = 0, int $lang = null, bool $parentHasUpdates = false) :array
     {
-        $entries=[];
+        $entries = [];
         //$depth--;
         if ($depth>$this->maxDepth) {
             return [];
@@ -168,9 +178,15 @@ class SlugsUtility
         $statement = $this->getStatementByPid($uids, $lang);
         while ($record = $statement->fetch()) {
             $hasUpdate=false;
-            if ($this->table!='pages' || ($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
+            if ($this->table != 'pages' ||
+                (
+                    $GLOBALS['TCA'][$this->table]['ctrl']['languageField']
+                    && ($lang === null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] == $lang)
+                    && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']])
+                )
+            ) {
                 $entry = $this->slugUtility->getEntryByRecord($record, $depth, $parentHasUpdates);
-                $hasUpdate=$entry['updated'];
+                $hasUpdate = $entry['updated'];
                 if ($doUdpates && $entry['updated']) {
                     $this->countUpdates++;
                     $this->slugUtility->updateEntry($entry);
@@ -178,11 +194,11 @@ class SlugsUtility
                 $entries[] = $entry;
             }
             if ($recursive) {
-                $subentries=$this->doSlugsByPid([$record['uid']], $doUdpates, $recursive, $depth+1, $lang, $parentHasUpdates || $hasUpdate);
+                $subentries = $this->doSlugsByPid([$record['uid']], $doUdpates, $recursive, $depth + 1, $lang, $parentHasUpdates || $hasUpdate);
                 if (count($subentries)) {
-                    $subentries[count($subentries)-1]['depthLast']=true; // mark for easy output
+                    $subentries[count($subentries) - 1]['depthLast'] = true; // mark for easy output
                 }
-                $entries=array_merge($entries, $subentries);
+                $entries = array_merge($entries, $subentries);
             }
         }
         return $entries;
@@ -193,17 +209,23 @@ class SlugsUtility
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
-    public function doSlugsAll(bool $doUdpates=false, int $lang=null) :array
+    public function doSlugsAll(bool $doUdpates = false, int $lang = null) :array
     {
-        $entries=[];
+        $entries = [];
         $this->slugUtility = GeneralUtility::makeInstance(SlugUtility::class, $this->table, $this->slugFieldName, $this->slugLockedFieldName, $this->fieldNamesToShow);
 
         $statement = $this->getStatementAll($lang);
         while ($record = $statement->fetch()) {
             $hasUpdate=false;
-            if ($this->table!='pages' || ($GLOBALS['TCA'][$this->table]['ctrl']['languageField'] && ($lang===null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]==$lang) && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]))) {
+            if ($this->table!='pages' ||
+                (
+                    $GLOBALS['TCA'][$this->table]['ctrl']['languageField']
+                    && ($lang === null || $record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] == $lang)
+                    && $this->hasLanguageId($record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']])
+                )
+            ) {
                 $entry = $this->slugUtility->getEntryByRecord($record, 0, false);
-                $hasUpdate=$entry['updated'];
+                $hasUpdate = $entry['updated'];
                 if ($doUdpates && $entry['updated']) {
                     $this->countUpdates++;
                     $this->slugUtility->updateEntry($entry);
@@ -218,7 +240,7 @@ class SlugsUtility
 
 
   
-    public function getSlugFields()
+    public function getSlugFields(): array
     {
         $fields=[];
         $fieldConfig = $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['config'];
@@ -229,7 +251,7 @@ class SlugsUtility
                     $fieldNameParts = GeneralUtility::trimExplode(',', $fieldNameParts);
                 }
                 foreach ($fieldNameParts as $listenerFieldName) {
-                    $fields[]=$listenerFieldName; // explode(',')
+                    $fields[] = $listenerFieldName; // explode(',')
                 }
             }
         }
@@ -237,15 +259,15 @@ class SlugsUtility
     }
 
 
-    protected function getStatementByPid($uids, int $lang=null)
+    protected function getStatementByPid($uids, int $lang = null): Result
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
     
         $queryBuilder->select('*')
-            ->from($this->table);
-        if ($this->table=='pages') {
+                     ->from($this->table);
+        if ($this->table == 'pages') {
             $queryBuilder->where(
                 $queryBuilder->expr()->in('pid', $uids)
             );
@@ -258,7 +280,7 @@ class SlugsUtility
                 if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
                     $queryBuilder->andWhere($queryBuilder->expr()->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds()));
                 }
-                if ($lang!==null) {
+                if ($lang !== null) {
                     $queryBuilder->andWhere($queryBuilder->expr()->eq($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)));
                 }
             }
@@ -268,13 +290,13 @@ class SlugsUtility
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
 
-        return $queryBuilder->execute();
+        return $queryBuilder->executeQuery();
     }
 
     // only for table pages
-    protected function getStatementByUid(array $uids, int $lang=null)
+    protected function getStatementByUid(array $uids, int $lang = null): array
     {
-        if (count($uids)==0) {
+        if (count($uids) == 0) {
             return [];
         }
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
@@ -282,14 +304,14 @@ class SlugsUtility
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
         // ->add(GeneralUtility::makeInstance(BackendWorkspaceRestriction::class)
         $queryBuilder->select('*')
-            ->from($this->table)
-            ->where(
-                $queryBuilder->expr()->orX(
-                    $queryBuilder->expr()->in('uid', $uids),
-                    $queryBuilder->expr()->in('l10n_parent', $uids)
-                ),
-                $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)
-            );
+                     ->from($this->table)
+                     ->where(
+                         $queryBuilder->expr()->orX(
+                             $queryBuilder->expr()->in('uid', $uids),
+                             $queryBuilder->expr()->in('l10n_parent', $uids)
+                         ),
+                         $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)
+                     );
 
         /*
           if( $lang!==null) {
@@ -303,24 +325,25 @@ class SlugsUtility
             // Ensure that all pages are run through "per parent page" field, and in the correct sorting values
             ->addOrderBy('pid', 'asc')
             ->addOrderBy('sorting', 'asc')
-            ->execute();
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
   
 
-    protected function getStatementAll(int $lang=null)
+    protected function getStatementAll(int $lang = null): Result
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
     
         $queryBuilder->select('*')
-            ->from($this->table);
+                     ->from($this->table);
         // only show entries with the correct language
         if ( !empty($this->getLanguageIds()) && $GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
             if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
                 $queryBuilder->andWhere($queryBuilder->expr()->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds()));
             }
-            if ($lang!==null) {
+            if ($lang !== null) {
                 $queryBuilder->andWhere($queryBuilder->expr()->eq($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)));
             }
         }
@@ -329,12 +352,12 @@ class SlugsUtility
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
         
-        return $queryBuilder->execute();
+        return $queryBuilder->executeQuery();
     }
 
-    public function getSlugTables(array $tableNames = [], $raiseError = true)
+    public function getSlugTables(array $tableNames = [], bool $raiseError = true): array
     {
-        $slugTables=[];
+        $slugTables = [];
         $lang = $this->getLanguageService();
         if (empty($tableNames)) {
             $tableNames = array_keys($GLOBALS['TCA']);
@@ -381,9 +404,9 @@ class SlugsUtility
         $depth--;
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
         $queryBuilder->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class))
-            ->add(GeneralUtility::makeInstance(BackendWorkspaceRestriction::class));
+                     ->removeAll()
+                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class))
+                     ->add(GeneralUtility::makeInstance(BackendWorkspaceRestriction::class));
         $queryBuilder
             ->select('uid')
             ->from('pages')
@@ -398,10 +421,10 @@ class SlugsUtility
         }
       
         if ($depth >= 0) {
-            $result = $queryBuilder->execute();
-            $rowCount = $queryBuilder->count('uid')->execute()->fetchColumn(0);
+            $result = $queryBuilder->executeQuery();
+            $rowCount = $queryBuilder->count('uid')->executeQuery()->fetchOne();
             $count = 0;
-            while ($row = $result->fetch()) {
+            while ($row = $result->fetchAssociative()) {
                 $rows[] = $row['uid'];
                 $rows = $this->getPageRecordsRecursive(
                     $row['uid'],
@@ -415,7 +438,7 @@ class SlugsUtility
     /**
      * @return BackendUserAuthentication
      */
-    protected function getBackendUser()
+    protected function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -425,7 +448,7 @@ class SlugsUtility
      * Returns the language service
      * @return LanguageService
      */
-    protected function getLanguageService()
+    protected function getLanguageService(): LanguageService
     {
         return $GLOBALS['LANG'];
     }

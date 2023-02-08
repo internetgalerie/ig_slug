@@ -32,12 +32,12 @@ class SlugUtility
      * @param string $slugLockedFieldName
      * @param array $fieldNamesToShow
      */
-    public function __construct(string $table, string $slugFieldName, string $slugLockedFieldName=null, array $fieldNamesToShow)
+    public function __construct(string $table, string $slugFieldName, string $slugLockedFieldName = null, array $fieldNamesToShow)
     {
-        $this->table=$table;
-        $this->slugFieldName=$slugFieldName;
-        $this->slugLockedFieldName=$slugLockedFieldName;
-        $this->fieldNamesToShow=$fieldNamesToShow;
+        $this->table = $table;
+        $this->slugFieldName = $slugFieldName;
+        $this->slugLockedFieldName = $slugLockedFieldName;
+        $this->fieldNamesToShow = $fieldNamesToShow;
         // get info of slug field
         $fieldConfig = $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['config'];
         $evalInfo = !empty($fieldConfig['eval']) ? GeneralUtility::trimExplode(',', $fieldConfig['eval'], true) : [];
@@ -47,12 +47,12 @@ class SlugUtility
         $this->slugHelper = GeneralUtility::makeInstance(SlugHelper::class, $this->table, $this->slugFieldName, $fieldConfig);
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
         $queryBuilder->getRestrictions()
-            ->removeAll()
-            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        $result=$queryBuilder->select('*')->from('sys_language') ->execute();
-        $this->flags=[];
-        while ($row = $result->fetch()) {
-            $this->flags[$row['uid']]=$row['flag'];
+                     ->removeAll()
+                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $result = $queryBuilder->select('*')->from('sys_language')->executeQuery();
+        $this->flags = [];
+        while ($row = $result->fetchAssociative()) {
+            $this->flags[$row['uid']] = $row['flag'];
         }
     }
 
@@ -64,13 +64,13 @@ class SlugUtility
      * @param bool $parentHasUpdates parents needs updates
      * @return array
      */
-    public function getEntryByRecord($record, int $depth=0, bool $parentHasUpdates=false)
+    public function getEntryByRecord($record, int $depth=0, bool $parentHasUpdates=false): array
     {
         $recordId = (int)$record['uid'];
         $pid = (int)$record['pid'];
 
         if ($pid === -1) {
-            $pid= $this->getLiveVersionPid($record['t3ver_oid']);
+            $pid = $this->getLiveVersionPid($record['t3ver_oid']);
         }
         $slugLocked= isset($this->slugLockedFieldName) && $record[$this->slugLockedFieldName]==1;
         if ($slugLocked) {
@@ -144,36 +144,36 @@ class SlugUtility
         return $entry;
     }
 
-    public function updateEntry($entry)
+    public function updateEntry(array $entry): void
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->update($this->table)
-            ->where(
-                $queryBuilder->expr()->eq(
-                    'uid',
-                    $queryBuilder->createNamedParameter($entry['uid'], \PDO::PARAM_INT)
-                )
-            )
-            ->set($this->slugFieldName, $entry['newSlug'])
-            ->execute();
+                     ->where(
+                         $queryBuilder->expr()->eq(
+                             'uid',
+                             $queryBuilder->createNamedParameter($entry['uid'], \PDO::PARAM_INT)
+                         )
+                     )
+                     ->set($this->slugFieldName, $entry['newSlug'])
+                     ->executeStatement();
         // Delete runtime Cache for rootline -> slug generate
-        $runtimeCache = GeneralUtility::makeInstance(CacheManager::class)->getCache('cache_runtime');
+        $runtimeCache = GeneralUtility::makeInstance(CacheManager::class)->getCache('runtime');
         $runtimeCache->set('backendUtilityPageForRootLine', []);
         $runtimeCache->set('backendUtilityBeGetRootLine', []);
     }
   
-    protected function getLiveVersionPid($t3ver_oid)
+    protected function getLiveVersionPid(int $t3ver_oid): int
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        $liveVersion = $queryBuilder
+        return $queryBuilder
                      ->select('pid')
                      ->from('pages')
                      ->where(
                          $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($t3ver_oid, \PDO::PARAM_INT))
-                     )->execute()->fetch();
-        return (int)$liveVersion['pid'];
+                     )->executeQuery()
+                     ->fetchOne();
     }
 }
