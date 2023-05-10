@@ -7,7 +7,7 @@ use Ig\IgSlug\Exception;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Database\Query\Restriction\BackendWorkspaceRestriction;
+use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
 use TYPO3\CMS\Core\DataHandling\SlugEnricher;
@@ -286,7 +286,7 @@ class SlugsUtility
             }
         }
         $queryBuilder->addOrderBy('pid', 'asc');
-        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
+        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby'] ?? false) {
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
 
@@ -302,11 +302,11 @@ class SlugsUtility
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        // ->add(GeneralUtility::makeInstance(BackendWorkspaceRestriction::class)
+        // ->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace)
         $queryBuilder->select('*')
                      ->from($this->table)
                      ->where(
-                         $queryBuilder->expr()->orX(
+                         $queryBuilder->expr()->or(
                              $queryBuilder->expr()->in('uid', $uids),
                              $queryBuilder->expr()->in('l10n_parent', $uids)
                          ),
@@ -406,7 +406,7 @@ class SlugsUtility
         $queryBuilder->getRestrictions()
                      ->removeAll()
                      ->add(GeneralUtility::makeInstance(DeletedRestriction::class))
-                     ->add(GeneralUtility::makeInstance(BackendWorkspaceRestriction::class));
+                     ->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace));
         $queryBuilder
             ->select('uid')
             ->from('pages')
@@ -428,7 +428,7 @@ class SlugsUtility
                 $rows[] = $row['uid'];
                 $rows = $this->getPageRecordsRecursive(
                     $row['uid'],
-                    $row['php_tree_stop'] ? 0 : $depth,
+                    ($row['php_tree_stop'] ?? false) ? 0 : $depth,
                     $rows
                 );
             }

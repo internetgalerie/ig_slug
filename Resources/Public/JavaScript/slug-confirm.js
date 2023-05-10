@@ -1,4 +1,4 @@
-import DocumentService from"@typo3/core/document-service.js"
+import DocumentService from "@typo3/core/document-service.js"
 import {default as Modal} from "@typo3/backend/modal.js";
 
 class SlugConfirm {

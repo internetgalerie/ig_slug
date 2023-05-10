@@ -104,8 +104,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     
     /*
      * Action: list
-     *
-     * @return void
      */
     public function listAction(): ResponseInterface
     {
@@ -178,8 +176,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
       
     /*
      * Action: update
-     *
-     * @return void
      */
     public function updateAction(): ResponseInterface
     {
