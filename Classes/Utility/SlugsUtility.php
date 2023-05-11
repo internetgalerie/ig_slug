@@ -179,7 +179,7 @@ class SlugsUtility
     {
         $entries = [];
         //$depth--;
-        if ($depth>$this->maxDepth) {
+        if ($depth > $this->maxDepth) {
             return [];
         }
         $statement = $this->getStatementByPid($uids, $lang);

@@ -63,7 +63,7 @@ class SlugUtility
      * @param bool $parentHasUpdates parents needs updates
      * @return array
      */
-    public function getEntryByRecord($record, int $depth=0, bool $parentHasUpdates=false): array
+    public function getEntryByRecord($record, int $depth = 0, bool $parentHasUpdates = false): array
     {
         $recordId = (int)$record['uid'];
         $pid = (int)$record['pid'];
@@ -88,7 +88,7 @@ class SlugUtility
                 $slug = $this->slugHelper->buildSlugForUniqueInTable($slug, $state);
             }
         }
-        $entry=[
+        $entry = [
             'uid' => $recordId,
             'updated' => $slug!=$record[$this->slugFieldName],
             'parentUpdated' => $parentHasUpdates,
@@ -99,11 +99,11 @@ class SlugUtility
             'depth' => $depth,
             'depthLast' => false
         ];
-        if ($this->table=='pages') {
+        if ($this->table == 'pages') {
             // Attributes for page tree
             $tcaCtrl = $GLOBALS['TCA'][$this->table]['ctrl'];
-            $typeicon_column=$GLOBALS['TCA'][$this->table]['ctrl']['typeicon_column'];
-            $entry[$typeicon_column]= $record[$typeicon_column];
+            $typeicon_column = $GLOBALS['TCA'][$this->table]['ctrl']['typeicon_column'];
+            $entry[$typeicon_column] = $record[$typeicon_column];
             $entry['nav_hide'] = $record['nav_hide'];
             $entry['is_siteroot'] = $record['is_siteroot'];
             $entry['module'] = $record['module'];
@@ -111,8 +111,8 @@ class SlugUtility
             if ($GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
                 $languageId = (int)$record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']];
                 $pageIdInDefaultLanguage = $languageId > 0 ? (int)$record['l10n_parent'] : $recordId;
-                $entry[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']]=$languageId;
-                $entry['flag']= isset($this->flags[$languageId]) ? 'flags-' . $this->flags[$languageId] : 'flags-multiple';
+                $entry[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] = $languageId;
+                $entry['flag'] = isset($this->flags[$languageId]) ? 'flags-' . $this->flags[$languageId] : 'flags-multiple';
             }
 
             if (isset($tcaCtrl['enablecolumns']) && is_array($tcaCtrl['enablecolumns'])) {
@@ -121,11 +121,11 @@ class SlugUtility
                 }
             }
             // Create entries for output
-            $depthHTML='';
-            for ($d=$depth;$d>0;$d--) {
+            $depthHTML = '';
+            for ($d = $depth; $d > 0; $d--) {
                 $depthHTML = '<span class="treeline-icon treeline-icon-clear"></span>' . $depthHTML;
             }
-            $entry['depthHTML']=$depthHTML;
+            $entry['depthHTML'] = $depthHTML;
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
             $iconHtml = $iconFactory->getIconForRecord('pages', $entry, Icon::SIZE_SMALL)->render();
             $entry['iconWithLink'] = BackendUtility::wrapClickMenuOnIcon($iconHtml, 'pages', $record['uid']);
