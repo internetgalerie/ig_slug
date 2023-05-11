@@ -96,7 +96,14 @@ class SlugsUtility
      */
     public function doSlugs(array $uids, bool $doUdpates=false, bool $recursive=false, int $maxDepth = 100, int $lang = null) :array
     {
-        if (!$GLOBALS['BE_USER']->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)) {
+        if (
+            !$this->getBackendUser()->check('tables_modify', $this->table)
+            ||
+            (
+                $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false
+                && !$this->getBackendUser()->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
+            )
+        ) {
             return [];
         }
         if (count($uids) == 0) {
@@ -263,8 +270,12 @@ class SlugsUtility
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
-        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-    
+        $queryBuilder
+            ->getRestrictions()
+            ->removeAll()
+            //->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace))
+            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+
         $queryBuilder->select('*')
                      ->from($this->table);
         if ($this->table == 'pages') {
@@ -301,8 +312,12 @@ class SlugsUtility
         }
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
-        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        // ->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace)
+        $queryBuilder
+            ->getRestrictions()
+            ->removeAll()
+            //->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace))
+            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+
         $queryBuilder->select('*')
                      ->from($this->table)
                      ->where(
@@ -334,7 +349,10 @@ class SlugsUtility
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
-        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+        $queryBuilder
+            ->getRestrictions()
+            ->removeAll()
+            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
     
         $queryBuilder->select('*')
                      ->from($this->table);
@@ -373,7 +391,14 @@ class SlugsUtility
         foreach ($tableNames as $tableName) {
             $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
             if (count($slugFields)) {
-                if ($GLOBALS['BE_USER']->check('non_exclude_fields', $tableName . ':' . $slugFields[0])) {
+                if (
+                    $this->getBackendUser()->check('tables_modify', $tableName)
+                    &&
+                    (
+                        !($GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false)
+                        || $this->getBackendUser()->check('non_exclude_fields', $tableName . ':' . $slugFields[0])
+                    )
+                ) {
                     $slugFieldName = $slugFields[0];
                     $slugLockedFieldName = isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
                     $slugTables[$tableName] =  [
@@ -403,10 +428,12 @@ class SlugsUtility
     {
         $depth--;
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('pages');
-        $queryBuilder->getRestrictions()
-                     ->removeAll()
-                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class))
-                     ->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace));
+        $queryBuilder
+            ->getRestrictions()
+            ->removeAll()
+            ->add(GeneralUtility::makeInstance(DeletedRestriction::class))
+            ->add(GeneralUtility::makeInstance(WorkspaceRestriction::class, $this->getBackendUser()->workspace));
+
         $queryBuilder
             ->select('uid')
             ->from('pages')

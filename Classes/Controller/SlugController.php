@@ -69,26 +69,31 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     /**
      * Initializes the backend module by setting internal variables, initializing the menu.
      */
-    protected function init(): void
+    protected function initSettings(): bool
     {
-        $this->id = (int)($this->request->getQueryParams()['id'] ?? $this->request->getParsedBody()['id'] ?? 0);
+        $this->pageUid = (int)($this->request->getQueryParams()['id'] ?? $this->request->getParsedBody()['id'] ?? 0);
         $this->initializeSiteLanguages();
         $this->slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
 
         $this->slugTables = $this->slugsUtility->getSlugTables();
+        if (empty($this->slugTables)) {
+            throw new Exception(sprintf('access rights are missing, no table with slugs found'), 1549656271);
+        }
         if ($this->request->hasArgument('search')) {
             $this->search = $this->request->getArgument('search');
         } else {
             $this->search = (array)$this->moduleData->get('search', []);
         }
-
     
         if (isset($this->search['table'])) {
             $activeTable = $this->search['table'];
-            if (!isset($this->slugTables[$activeTable])) {
-                throw new Exception(sprintf('access rights are missing on "%s"', $activeTable), 1549656272);
+            if (isset($this->slugTables[$activeTable])) {
+                $this->slugTable = $this->slugTables[$activeTable];
+            } else {
+                //throw new Exception(sprintf('access rights are missing on "%s"', $activeTable), 1549656272);
+                $this->slugTable = reset($this->slugTables);
+                return false;
             }
-            $this->slugTable = $this->slugTables[$activeTable];
         } else {
             $this->slugTable = reset($this->slugTables);
         }
@@ -100,6 +105,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->slugsUtility->setTable($this->slugTable['table']);
         $this->slugsUtility->setSlugFieldName($this->slugTable['slugFieldName']);
         $this->slugsUtility->setSlugLockedFieldName($this->slugTable['slugLockedFieldName']);
+        return true;
     }
     
     /*
@@ -107,7 +113,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
      */
     public function listAction(): ResponseInterface
     {
-        $this->init();
+        $this->initSettings();
         $this->moduleData->set('search', $this->search);
 
         $this->getBackendUser()->pushModuleData($this->moduleData->getModuleIdentifier(), $this->moduleData->toArray());
@@ -118,14 +124,14 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->slugsUtility->setFieldNamesToShow($fields);
 
         if ($this->slugTable['table'] == 'pages') {
-            $entries = $this->slugsUtility->viewSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
+            $entries = $this->slugsUtility->viewSlugsByUidRecursive([$this->pageUid], $this->depth, $this->lang);
         } else {
-            $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
+            $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->pageUid, $this->depth, [$this->pageUid]);
             $entries = $this->slugsUtility->viewSlugs($pageUids, $this->lang);
         }
 
         // show pageinfo in header right
-        $this->pageinfo = BackendUtility::readPageAccess($this->id, $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)) ?: [];
+        $this->pageinfo = BackendUtility::readPageAccess($this->pageUid, $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)) ?: [];
         // The page will show only if there is a valid page and if this page
         // may be viewed by the user
         if ($this->pageinfo !== []) {
@@ -136,7 +142,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $disableOwnMenuItem = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('ig_slug')['disableOwnMenuItem'] ?? 0);        
         if ($disableOwnMenuItem) {
             // show menu in web info module
-            $this->moduleTemplate->makeDocHeaderModuleMenu(['id' => $this->id]);
+            $this->moduleTemplate->makeDocHeaderModuleMenu(['id' => $this->pageUid]);
             $routeName = 'web_info_IgSlug';
         } else {
             $routeName = 'web_IgSlug';
@@ -150,9 +156,9 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             'entries' => $entries,
             'slugTables' => $this->slugTables,
             'activeTable' => $this->activeTable,
-            'pageUid' => $this->id,
+            'pageUid' => $this->pageUid,
             'rebuildUrl' => $this->backendUriBuilder->buildUriFromRoute($routeName, [
-                'id' => $this->id,
+                'id' => $this->pageUid,
                 'search' => $this->search,
                 'action' => 'update',
             ]),
@@ -179,15 +185,15 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
      */
     public function updateAction(): ResponseInterface
     {
-        $this->init();
-        if ($this->activeTable == 'pages') {
-            $pagesCount = $this->slugsUtility->populateSlugsByUidRecursive([$this->id], $this->depth, $this->lang);
-        } else {
-            $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->id, $this->depth, [$this->id]);
-            $pagesCount = $this->slugsUtility->populateSlugs($pageUids, $this->lang);
+        if ($this->initSettings()) {
+            if ($this->activeTable == 'pages') {
+                $pagesCount = $this->slugsUtility->populateSlugsByUidRecursive([$this->pageUid], $this->depth, $this->lang);
+            } else {
+                $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->pageUid, $this->depth, [$this->pageUid]);
+                $pagesCount = $this->slugsUtility->populateSlugs($pageUids, $this->lang);
+            }
+            $this->addFlashMessage(LocalizationUtility::translate($pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
         }
-        $this->addFlashMessage(LocalizationUtility::translate($pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
-
         return new ForwardResponse('list');
     }
 
@@ -229,7 +235,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     {
         /** @var SiteInterface $currentSite */
         $currentSite = $GLOBALS['TYPO3_REQUEST']->getAttribute('site');
-        $this->siteLanguages = $currentSite->getAvailableLanguages($this->getBackendUser(), false, (int)$this->id);
+        $this->siteLanguages = $currentSite->getAvailableLanguages($this->getBackendUser(), false, (int)$this->pageUid);
     }
  
 

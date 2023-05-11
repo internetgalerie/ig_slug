@@ -9,7 +9,7 @@ return
          'web_info_IgSlug' => [
              'parent' => 'web_info',
              'position' => ['after' => 'web_info'],
-             'access' => 'user,group',
+             'access' => 'user',
              'workspaces' => 'live',
              'iconIdentifier' => 'ig-slug-rebuild',
              'path' => '/module/web/info/ig-slug/rebuild',
@@ -29,7 +29,7 @@ return
          'web_IgSlug' => [
              'parent' => 'web',
              'position' => ['after' => 'web_info'],
-             'access' => 'user,group',
+             'access' => 'user',
              'workspaces' => 'live',
              'iconIdentifier' => 'ig-slug-rebuild',
              'path' => '/module/web/ig-slug/rebuild',
