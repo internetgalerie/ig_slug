@@ -52,7 +52,7 @@ class UpdateCommand extends Command
             )
             ->addOption(
                 'language',
-                'l',
+                'L',
                 InputOption::VALUE_REQUIRED,
                 'limit to languages',
             );

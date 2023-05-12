@@ -45,7 +45,7 @@ for page recursive for pid=20
 
 or only for default language:
 
-`vendor/bin/typo3 ig_slug:update -l 0 -R -- pages 20`
+`vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20`
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
 [2]: https://getcomposer.org/
