@@ -7,6 +7,7 @@ use Ig\IgSlug\Utility\SlugsUtility;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -42,13 +43,19 @@ class UpdateCommand extends Command
                 'the pid to use for rebuild',
                 0
             )
-            ->addArgument(
-                'depth',
-                InputArgument::OPTIONAL,
-                'tree depth',
+            ->addOption(
+                'recursive',
+                'R',
+                InputOption::VALUE_OPTIONAL,
+                'recursive level',
                 0
+            )
+            ->addOption(
+                'language',
+                'l',
+                InputOption::VALUE_REQUIRED,
+                'limit to languages',
             );
- 
     }
  
     /**
@@ -63,9 +70,13 @@ class UpdateCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $tablename = $input->getArgument('tablename');
         $pid = (int)$input->getArgument('pid');
-        $depth = (int)$input->getArgument('depth');
-        $lang = null;//all
-
+        $recursive = (int)($input->getOption('recursive') ?? 999);
+        
+        // language: null is all
+        $language = $input->getOption('language');
+        if ($language !== null) {
+            $language = (int)$language;
+        }
         $siteLanguages = [];
         if ($pid) {
              try {
@@ -78,13 +89,13 @@ class UpdateCommand extends Command
         $slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $siteLanguages);
         try {
             $slugTables = $slugsUtility->getSlugTables([$tablename], true);
-        } catch(Exception\TableNotFoundException $e) {
+        } catch (Exception\TableNotFoundException $e) {
             $io->error('Error table "' . $tablename . '" not found (no TCA found)');
             return 1;
-        } catch(Exception\SlugNotFoundException $e) {
+        } catch (Exception\SlugNotFoundException $e) {
             $io->error('Error table "' . $tablename . '" has no slug field');
             return 1;
-        } catch(Exception\AccessDeniedException $e) {
+        } catch (Exception\AccessDeniedException $e) {
             $io->error('Access dienied to modify slug field on table "' . $tablename . '"');
             return 1;
         }
@@ -98,13 +109,13 @@ class UpdateCommand extends Command
             $fields = $slugsUtility->getSlugFields();
             $slugsUtility->setFieldNamesToShow($fields);
              if ($tablename=='pages') {
-                 $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $depth, $lang);
+                 $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
             } else {
                  if ($pid>0) {
-                     $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $depth, [$pid]);
-                     $pagesCount=$slugsUtility->populateSlugs($pageUids, $lang);
+                     $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);
+                     $pagesCount=$slugsUtility->populateSlugs($pageUids, $language);
                  } else {
-                     $pagesCount=$slugsUtility->populateSlugsAll( $lang);
+                     $pagesCount=$slugsUtility->populateSlugsAll($language);
                  }
             }
              $languageService = $this->getLanguageService();

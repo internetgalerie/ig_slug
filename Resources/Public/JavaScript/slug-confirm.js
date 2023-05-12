@@ -25,11 +25,11 @@ class SlugConfirm {
     dialog(title, message, url) {
         let confirmBox = Modal.confirm(title, message);
 	    confirmBox.addEventListener("confirm.button.ok",(()=>{
-                document.location.href = url,
-		confirmBox.hideModal()
+                document.location.href = url;
+		confirmBox.hideModal();
 	    }));
 	confirmBox.addEventListener("confirm.button.cancel",(()=>{
-	    confirmBox.hideModal()
+	    confirmBox.hideModal();
 	}));
         return false;
     };

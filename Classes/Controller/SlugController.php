@@ -47,7 +47,9 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     {
         $this->moduleData = $this->request->getAttribute('moduleData');
         $this->moduleTemplate = $this->moduleTemplateFactory->create($this->request);
-        $this->moduleTemplate->setTitle(LocalizationUtility::translate('LLL:EXT:ig_slug/Resources/Private/Language/locallang_rebuild.xlf:mlang_labels_tablabel'));
+        $this->moduleTemplate->setTitle(
+            LocalizationUtility::translate('LLL:EXT:ig_slug/Resources/Private/Language/locallang_rebuild.xlf:mlang_labels_tablabel')
+        );
         $this->moduleTemplate->setFlashMessageQueue($this->getFlashMessageQueue());
     }
 
@@ -62,8 +64,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->pageRenderer->loadJavaScriptModule('@typo3/backend/context-menu.js');
         $this->pageRenderer->loadJavaScriptModule('@ig/igslug/slug-confirm.js');
         $this->pageRenderer->addCssFile('EXT:ig_slug/Resources/Public/Css/ig_slug_be.css');
-        //$this->pageRenderer->addInlineLanguageLabelFile('EXT:lang/Resources/Private/Language/locallang_core.xlf');
-        //$this->pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
     }
     
     /**
@@ -131,7 +131,10 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         }
 
         // show pageinfo in header right
-        $this->pageinfo = BackendUtility::readPageAccess($this->pageUid, $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)) ?: [];
+        $this->pageinfo = BackendUtility::readPageAccess(
+            $this->pageUid,
+            $this->getBackendUser()->getPagePermsClause(Permission::PAGE_SHOW)
+        ) ?: [];
         // The page will show only if there is a valid page and if this page
         // may be viewed by the user
         if ($this->pageinfo !== []) {
@@ -139,7 +142,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         }
 
         // own menu item or subitem of web info
-        $disableOwnMenuItem = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('ig_slug')['disableOwnMenuItem'] ?? 0);        
+        $disableOwnMenuItem = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get('ig_slug')['disableOwnMenuItem'] ?? 0);
         if ($disableOwnMenuItem) {
             // show menu in web info module
             $this->moduleTemplate->makeDocHeaderModuleMenu(['id' => $this->pageUid]);
@@ -163,19 +166,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
                 'action' => 'update',
             ]),
         ]);
-        /*
-        // as main menu
-        $this->uriBuilder->setRequest($this->request);
-        $menu = $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->makeMenu();
-        $menu->setIdentifier('IgSlugModuleMenu');
-        $menu->addMenuItem(
-            $menu->makeMenuItem()
-                 ->setTitle(LocalizationUtility::translate('LLL:EXT:ig_slug/Resources/Private/Language/locallang.xlf:igSlug.populateSlug', 'ig_slug'))
-                 ->setHref($this->uriBuilder->uriFor('update'))
-                 ->setActive(true)
-        );
-        $this->moduleTemplate->getDocHeaderComponent()->getMenuRegistry()->addMenu($menu);
-        */
         return $this->moduleTemplate->renderResponse('Slug/List');
     }
 
@@ -192,7 +182,13 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
                 $pageUids = $this->slugsUtility->getPageRecordsRecursive($this->pageUid, $this->depth, [$this->pageUid]);
                 $pagesCount = $this->slugsUtility->populateSlugs($pageUids, $this->lang);
             }
-            $this->addFlashMessage(LocalizationUtility::translate($pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug', 'ig_slug', [$pagesCount]));
+            $this->addFlashMessage(
+                LocalizationUtility::translate(
+                    $pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug',
+                    'ig_slug',
+                    [$pagesCount]
+                )
+            );
         }
         return new ForwardResponse('list');
     }

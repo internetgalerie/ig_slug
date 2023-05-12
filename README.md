@@ -33,12 +33,19 @@ Download and install the extension with the extension manager module.
 
 The slugs can also rebuilded in CLI, e.g.
 
-`typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news`
+`vendor/bin/typo3 ig_slug:update tx_news_domain_model_news`
 
 or with pid 
 
-`typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99` 
+`vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99` 
 
+for page recursive for pid=20
+
+`vendor/bin/typo3 ig_slug:update pages 20 -R`
+
+or only for default language:
+
+`vendor/bin/typo3 ig_slug:update -l 0 -R -- pages 20`
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
 [2]: https://getcomposer.org/

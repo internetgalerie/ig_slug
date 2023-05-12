@@ -31,7 +31,7 @@ class SlugUtility
      * @param string $slugLockedFieldName
      * @param array $fieldNamesToShow
      */
-    public function __construct(string $table, string $slugFieldName, string $slugLockedFieldName = null, array $fieldNamesToShow)
+    public function __construct(string $table, string $slugFieldName, ?string $slugLockedFieldName, array $fieldNamesToShow)
     {
         $this->table = $table;
         $this->slugFieldName = $slugFieldName;
@@ -56,7 +56,7 @@ class SlugUtility
     }
 
     /**
-     * builds slut changes entry for output from database entry
+     * builds slug changes entry for output from database entry
      *
      * @param array $record DB Entry
      * @param int $depth tree deepth
@@ -102,15 +102,15 @@ class SlugUtility
         if ($this->table == 'pages') {
             // Attributes for page tree
             $tcaCtrl = $GLOBALS['TCA'][$this->table]['ctrl'];
-            $typeicon_column = $GLOBALS['TCA'][$this->table]['ctrl']['typeicon_column'];
-            $entry[$typeicon_column] = $record[$typeicon_column];
+            $typeiconColumn = $GLOBALS['TCA'][$this->table]['ctrl']['typeicon_column'];
+            $entry[$typeiconColumn] = $record[$typeiconColumn];
             $entry['nav_hide'] = $record['nav_hide'];
             $entry['is_siteroot'] = $record['is_siteroot'];
             $entry['module'] = $record['module'];
 
             if ($GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
                 $languageId = (int)$record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']];
-                $pageIdInDefaultLanguage = $languageId > 0 ? (int)$record['l10n_parent'] : $recordId;
+                //$pageIdInDefaultLanguage = $languageId > 0 ? (int)$record['l10n_parent'] : $recordId;
                 $entry[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] = $languageId;
                 $entry['flag'] = isset($this->flags[$languageId]) ? 'flags-' . $this->flags[$languageId] : 'flags-multiple';
             }
@@ -162,7 +162,7 @@ class SlugUtility
         $runtimeCache->set('backendUtilityBeGetRootLine', []);
     }
   
-    protected function getLiveVersionPid(int $t3ver_oid): int
+    protected function getLiveVersionPid(int $t3verOid): int
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
         $queryBuilder = $connection->createQueryBuilder();
@@ -171,7 +171,7 @@ class SlugUtility
                      ->select('pid')
                      ->from('pages')
                      ->where(
-                         $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($t3ver_oid, \PDO::PARAM_INT))
+                         $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($t3verOid, \PDO::PARAM_INT))
                      )->executeQuery()
                      ->fetchOne();
     }
