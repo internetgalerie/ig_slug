@@ -129,7 +129,8 @@ class SlugsUtility
             $this->table,
             $this->slugFieldName,
             $this->slugLockedFieldName,
-            $this->fieldNamesToShow
+            $this->fieldNamesToShow,
+            $this->siteLanguages
         );
 
         if ($this->table == 'pages') {
@@ -247,9 +248,10 @@ class SlugsUtility
             $this->table,
             $this->slugFieldName,
             $this->slugLockedFieldName,
-            $this->fieldNamesToShow
+            $this->fieldNamesToShow,
+            $this->siteLanguages
         );
-
+        
         $statement = $this->getStatementAll($lang);
         while ($record = $statement->fetch()) {
             if ($this->table!='pages' ||

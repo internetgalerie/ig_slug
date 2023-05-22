@@ -31,7 +31,7 @@ class SlugUtility
      * @param string $slugLockedFieldName
      * @param array $fieldNamesToShow
      */
-    public function __construct(string $table, string $slugFieldName, ?string $slugLockedFieldName, array $fieldNamesToShow)
+    public function __construct(string $table, string $slugFieldName, ?string $slugLockedFieldName, array $fieldNamesToShow, array $siteLanguages)
     {
         $this->table = $table;
         $this->slugFieldName = $slugFieldName;
@@ -44,14 +44,10 @@ class SlugUtility
         $this->hasToBeUniqueInPid = in_array('uniqueInPid', $evalInfo, true);
         $this->hasToBeUniqueInTable = in_array('unique', $evalInfo, true);
         $this->slugHelper = GeneralUtility::makeInstance(SlugHelper::class, $this->table, $this->slugFieldName, $fieldConfig);
-        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('sys_language');
-        $queryBuilder->getRestrictions()
-                     ->removeAll()
-                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
-        $result = $queryBuilder->select('*')->from('sys_language')->executeQuery();
+        ///$sites = GeneralUtility::makeInstance(SiteFinder::class)->getAllSites();
         $this->flags = [];
-        while ($row = $result->fetchAssociative()) {
-            $this->flags[$row['uid']] = $row['flag'];
+        foreach ($siteLanguages as $siteLanguageUid => $siteLanguage) {
+            $this->flags[$siteLanguageUid] = $siteLanguage->getFlagIdentifier();
         }
     }
 
@@ -112,7 +108,7 @@ class SlugUtility
                 $languageId = (int)$record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']];
                 //$pageIdInDefaultLanguage = $languageId > 0 ? (int)$record['l10n_parent'] : $recordId;
                 $entry[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] = $languageId;
-                $entry['flag'] = isset($this->flags[$languageId]) ? 'flags-' . $this->flags[$languageId] : 'flags-multiple';
+                $entry['flag'] = $this->flags[$languageId] ?? 'flags-multiple';
             }
 
             if (isset($tcaCtrl['enablecolumns']) && is_array($tcaCtrl['enablecolumns'])) {
