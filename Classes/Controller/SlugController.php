@@ -28,6 +28,14 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     protected int $depth = 0; // get from .....
     protected ?ModuleData $moduleData = null;
     protected ModuleTemplate $moduleTemplate;
+    protected int $pageUid = 0;
+    protected ?SlugsUtility $slugsUtility = null;
+    protected $siteLanguages = null;
+    protected $pageinfo = null;
+    protected ?int $lang = 0;
+    protected $slugTables;
+    protected $slugTable;
+    protected $activeTable;
 
     
     public function __construct(
