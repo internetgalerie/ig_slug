@@ -22,6 +22,7 @@ class SlugUtility
     protected $hasToBeUniqueInPid;
     protected $hasToBeUniqueInTable;
     protected $fieldNamesToShow;
+    protected $flags;
   
     /**
      * Instantiate the form protection before a simulated user is initialized.
@@ -67,7 +68,7 @@ class SlugUtility
         if ($pid === -1) {
             $pid = $this->getLiveVersionPid($record['t3ver_oid']);
         }
-        $slugLocked= isset($this->slugLockedFieldName) && $record[$this->slugLockedFieldName]==1;
+        $slugLocked= isset($this->slugLockedFieldName) && isset($record[$this->slugLockedFieldName]) && $record[$this->slugLockedFieldName]==1;
         if ($slugLocked) {
             $slug=$record[$this->slugFieldName];
         } else {

@@ -26,6 +26,8 @@ class SlugsUtility
     protected int $countUpdates = 0;
     protected int $maxDepth = 100;
     protected array $siteLanguagesIds = [];
+    protected $siteLanguages;
+    protected $slugUtility;
 
 
     /**
