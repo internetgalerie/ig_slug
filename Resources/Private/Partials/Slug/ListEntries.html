@@ -1,6 +1,6 @@
 <div class="collapse show mt-3 mb-4">
   <div class="table-fit mb-0">
-    <table data-table="{activeTable}" class="table table-striped table-hover mb-0">
+    <table data-table="{activeTable}" class="table table-striped table-slug table-hover mb-0">
       <thead>
 	<tr>
 	  <f:if condition="{activeTable}=='pages'">
@@ -15,7 +15,7 @@
 	  </th>
 	  <th class="nowrap"><f:translate key="igSlug.oldSlug" extensionName="IgSlug" /></th>
 	  <th class="nowrap"><f:translate key="igSlug.newSlug" extensionName="IgSlug" /></th>
-	  <th class="nowrap"><f:translate key="igSlug.locked" extensionName="IgSlug" /></th>
+	  <th class="nowrap col-center"><f:translate key="igSlug.locked" extensionName="IgSlug" /></th>
 	</tr>
       </thead>
       <tbody data-multi-record-selection-row-selection="true">
@@ -44,12 +44,12 @@
 	      </f:if>
 	      <f:if condition="{entry.slugLocked} || !{entry.updated}">
 		<f:then>
-		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
-		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug">{entry.slug}</td>
+		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug" title="{entry.slug}">{entry.slug}</td>
+		  <td class="{f:if(condition: entry.parentUpdated, then: 'diff-item-result diff-item-maybe ')}col-responsive col-slug" title="{entry.slug}">{entry.slug}</td>
 		</f:then>
 		<f:else>
-		  <td class="diff-item-result col-responsive col-slug"><del>{entry.slug}</del></td>
-		  <td class="diff-item-result col-responsive col-slug"><ins>{entry.newSlug}</ins></td>
+		  <td class="diff-item-result col-responsive col-slug" title="{entry.slug}"><del>{entry.slug}</del></td>
+		  <td class="diff-item-result col-responsive col-slug" title="{entry.newSlug}"><ins>{entry.newSlug}</ins></td>
 		</f:else>
 	      </f:if>
 	      <td class="col-center">{entry.slugLocked}</td>
