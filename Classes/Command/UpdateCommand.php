@@ -1,7 +1,9 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Ig\IgSlug\Command;
- 
+
 use Ig\IgSlug\Exception;
 use Ig\IgSlug\Utility\SlugsUtility;
 use Symfony\Component\Console\Command\Command;
@@ -30,32 +32,10 @@ class UpdateCommand extends Command
     {
         $this
             ->setDescription('create/update slugs')
-            //->setHelp('')
-            //->setAliases(['ig:update'])
-            ->addArgument(
-                'tablename',
-                InputArgument::REQUIRED,
-                'the tablename to create/update the slugs'
-            )
-            ->addArgument(
-                'pid',
-                InputArgument::OPTIONAL,
-                'the pid to use for rebuild',
-                0
-            )
-            ->addOption(
-                'recursive',
-                'R',
-                InputOption::VALUE_OPTIONAL,
-                'recursive level',
-                0
-            )
-            ->addOption(
-                'language',
-                'L',
-                InputOption::VALUE_REQUIRED,
-                'limit to languages',
-            );
+            ->addArgument('tablename', InputArgument::REQUIRED, 'the tablename to create/update the slugs')
+            ->addArgument('pid', InputArgument::OPTIONAL, 'the pid to use for rebuild', 0)
+            ->addOption('recursive', 'R', InputOption::VALUE_OPTIONAL, 'recursive level', 0)
+            ->addOption('language', 'L', InputOption::VALUE_REQUIRED, 'limit to languages');
     }
  
     /**
@@ -71,36 +51,38 @@ class UpdateCommand extends Command
         $tablename = $input->getArgument('tablename');
         $pid = (int)$input->getArgument('pid');
         $recursive = (int)($input->getOption('recursive') ?? 999);
-        
+
         // language: null is all
         $language = $input->getOption('language');
         if ($language !== null) {
             $language = (int)$language;
         }
+
         $siteLanguages = [];
         if ($pid) {
-             try {
-                 $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pid);
-                 $siteLanguages = $site->getAvailableLanguages($this->getBackendUser(), false, $pid);
-             } catch (SiteNotFoundException $e) {
-                 // no site for this pid found
-             }
+            try {
+                $site = GeneralUtility::makeInstance(SiteFinder::class)->getSiteByPageId($pid);
+                $siteLanguages = $site->getAvailableLanguages($this->getBackendUser(), false, $pid);
+            } catch (SiteNotFoundException) {
+                // no site for this pid found
+            }
         }
+
         $slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $siteLanguages);
         try {
             $slugTables = $slugsUtility->getSlugTables([$tablename], true);
-        } catch (Exception\TableNotFoundException $e) {
+        } catch (Exception\TableNotFoundException) {
             $io->error('Error table "' . $tablename . '" not found (no TCA found)');
             return 1;
-        } catch (Exception\SlugNotFoundException $e) {
+        } catch (Exception\SlugNotFoundException) {
             $io->error('Error table "' . $tablename . '" has no slug field');
             return 1;
-        } catch (Exception\AccessDeniedException $e) {
+        } catch (Exception\AccessDeniedException) {
             $io->error('Access dienied to modify slug field on table "' . $tablename . '"');
             return 1;
         }
+
         if (isset($slugTables[$tablename])) {
-            //$tablename && isset($GLOBALS['TCA'][$tablename])) {
             $slugTable = $slugTables[$tablename];
             $slugsUtility->setTable($tablename);
             $slugsUtility->setTable($slugTable['table']);
@@ -108,30 +90,33 @@ class UpdateCommand extends Command
             $slugsUtility->setSlugLockedFieldName($slugTable['slugLockedFieldName']);
             $fields = $slugsUtility->getSlugFields();
             $slugsUtility->setFieldNamesToShow($fields);
-             if ($tablename=='pages') {
-                 $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
+            if ($tablename == 'pages') {
+                $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
+            } elseif ($pid > 0) {
+                $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);
+                $pagesCount = $slugsUtility->populateSlugs($pageUids, $language);
             } else {
-                 if ($pid>0) {
-                     $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);
-                     $pagesCount=$slugsUtility->populateSlugs($pageUids, $language);
-                 } else {
-                     $pagesCount=$slugsUtility->populateSlugsAll($language);
-                 }
+                $pagesCount = $slugsUtility->populateSlugsAll($language);
             }
-             $languageService = $this->getLanguageService();
-             $message = sprintf($languageService->sL('LLL:EXT:ig_slug/Resources/Private/Language/locallang.xlf:' . ($pagesCount!=1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug')), $pagesCount);
+
+            $languageService = $this->getLanguageService();
+            $message = sprintf(
+                $languageService->sL(
+                    'LLL:EXT:ig_slug/Resources/Private/Language/locallang.xlf:'
+                    . ($pagesCount != 1 ? 'igSlug.populatedSlugs' : 'igSlug.populatedSlug')
+                ),
+                $pagesCount
+            );
 
 
             $io->success($message);
             return 0;
         }
-        
-        return 1;
-     }
 
-    /**
-     * @return BackendUserAuthentication
-     */
+        return 1;
+    }
+
+    
     protected function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];

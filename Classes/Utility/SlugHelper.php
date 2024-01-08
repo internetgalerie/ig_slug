@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -28,19 +28,17 @@ use TYPO3\CMS\Core\Utility\RootlineUtility;
  */
 class SlugHelper extends \TYPO3\CMS\Core\DataHandling\SlugHelper
 {
-
-
     /**
      * Ensure root line caches are flushed to avoid any issue regarding moving of pages or dynamically creating
      * sites while managing slugs at the same request
      */
     protected function flushRootLineCaches(): void
     {
-        // Changes: it is just too slow for multi domain sites with many slug conflicts - but uncommenting is also not the best idea [Daniel Abplanalp 2019-09-27]
-        // @todo check if this is still the case
+        // Changes: it is just too slow for multi domain sites with many slug conflicts
+        // but uncommenting is also not the best idea [Daniel Abplanalp 2019-09-27]
+        // check if this is still the case
         //$cacheManager = GeneralUtility::makeInstance(CacheManager::class);
         //$cacheManager->getCache('runtime')->flushByTag(RootlineUtility::RUNTIME_CACHE_TAG);
         //$cacheManager->getCache('rootline')->flush();
     }
-
 }

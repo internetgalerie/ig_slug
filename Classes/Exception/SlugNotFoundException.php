@@ -1,5 +1,7 @@
 <?php
-declare(strict_types = 1);
+
+declare(strict_types=1);
+
 namespace Ig\IgSlug\Exception;
 
 use TYPO3\CMS\Core\Exception;
