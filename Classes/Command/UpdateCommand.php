@@ -43,7 +43,7 @@ class UpdateCommand extends Command
      *
      * @inheritdoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Make sure the _cli_ user is loaded
         Bootstrap::initializeBackendAuthentication();
