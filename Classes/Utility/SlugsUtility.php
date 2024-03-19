@@ -116,14 +116,18 @@ class SlugsUtility
         int $lang = null
     ): array {
         if (
-            !$this->getBackendUser()
-->check('tables_modify', $this->table)
-            ||
-            (
-                $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false
-                && !$this->getBackendUser()
-->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
-            )
+			(
+				!$this->getBackendUser()
+	->check('tables_modify', $this->table)
+				||
+				(
+					$GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false
+					&& !$this->getBackendUser()
+	->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
+				)
+			)
+			&&
+			!$this->getBackendUser()->isAdmin()
         ) {
             return [];
         }
