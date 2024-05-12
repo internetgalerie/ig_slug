@@ -534,23 +534,23 @@ class SlugsUtility
             if ($lang !== null) {
                 $queryBuilder->andWhere(
                     $queryBuilder->expr()
-->eq(
-    $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
-    $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
-)
+                        ->eq(
+                            $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
+                            $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
+                        )
                 );
             }
         }
 
         $queryBuilder->addOrderBy('pid', 'asc');
-        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
+        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby'] ?? false) {
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
 
         return $queryBuilder->executeQuery();
     }
 
-    
+
     protected function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
