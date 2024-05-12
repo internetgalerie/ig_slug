@@ -121,7 +121,7 @@ class SlugUtility
             $entry['is_siteroot'] = $record['is_siteroot'];
             $entry['module'] = $record['module'];
 
-            if ($GLOBALS['TCA'][$this->table]['ctrl']['languageField']) {
+            if (isset($GLOBALS['TCA'][$this->table]['ctrl']['languageField'])) {
                 $languageId = (int)$record[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']];
                 $entry[$GLOBALS['TCA'][$this->table]['ctrl']['languageField']] = $languageId;
                 $entry['flag'] = $this->flags[$languageId] ?? 'flags-multiple';
