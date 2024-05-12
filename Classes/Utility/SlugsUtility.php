@@ -543,7 +543,7 @@ class SlugsUtility
         }
 
         $queryBuilder->addOrderBy('pid', 'asc');
-        if ($GLOBALS['TCA'][$this->table]['ctrl']['sortby']) {
+        if (isset($GLOBALS['TCA'][$this->table]['ctrl']['sortby'])) {
             $queryBuilder->addOrderBy($GLOBALS['TCA'][$this->table]['ctrl']['sortby'], 'asc');
         }
 
