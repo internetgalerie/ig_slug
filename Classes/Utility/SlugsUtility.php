@@ -534,10 +534,10 @@ class SlugsUtility
             if ($lang !== null) {
                 $queryBuilder->andWhere(
                     $queryBuilder->expr()
-->eq(
-    $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
-    $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
-)
+                        ->eq(
+                            $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
+                            $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
+                        )
                 );
             }
         }
@@ -550,7 +550,7 @@ class SlugsUtility
         return $queryBuilder->executeQuery();
     }
 
-    
+
     protected function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
