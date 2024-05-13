@@ -34,11 +34,12 @@ Download and install the extension with the extension manager module.
 The slugs can also rebuilded in CLI, e.g.
 
 <hr />
-#### "Composer-based installation"
+
+#### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-#### "Legacy installation"
+#### Legacy installation
 
     typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
