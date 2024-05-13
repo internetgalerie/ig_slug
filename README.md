@@ -33,8 +33,6 @@ Download and install the extension with the extension manager module.
 
 The slugs can also rebuilded in CLI, e.g.
 
-<hr />
-
 #### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
@@ -43,49 +41,35 @@ The slugs can also rebuilded in CLI, e.g.
 
     typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-
 or with pid
 
-=== "Composer-based installation"
+#### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
-      .. code-block:: bash
+#### Legacy installation
 
-         typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
+    typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
 for page recursive for pid=20
 
-.. tabs::
+#### Composer-based installation
 
-   .. group-tab:: Composer-based installation
+    vendor/bin/typo3 ig_slug:update pages 20 -R
 
-      .. code-block:: bash
+#### Legacy installation
 
-         vendor/bin/typo3 ig_slug:update pages 20 -R
-
-   .. group-tab:: Legacy installation
-
-      .. code-block:: bash
-
-         typo3/sysext/core/bin/typo3 ig_slug:update pages 20 -R
-
+    typo3/sysext/core/bin/typo3 ig_slug:update pages 20 -R
 
 or only for default language:
 
-.. tabs::
+#### Composer-based installation
 
-   .. group-tab:: Composer-based installation
+    vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
 
-      .. code-block:: bash
+#### Legacy installation
 
-         vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
-
-   .. group-tab:: Legacy installation
-
-      .. code-block:: bash
-
-         typo3/sysext/core/bin/typo3 ig_slug:update -L 0 -R -- pages 20
+    typo3/sysext/core/bin/typo3 ig_slug:update -L 0 -R -- pages 20
 
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
