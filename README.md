@@ -32,49 +32,49 @@ Download and install the extension with the extension manager module.
 ### 2) CLI
 
 The slugs can also be
-#### completely rebuilt in CLI
+*   completely rebuilt in CLI
 
-- - -
-Composer-based installation
+    - - -
+    Composer-based installation
 
-    vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
+        vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-Legacy installation
+    Legacy installation
 
-    typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
+        typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-#### with pid
+*   with pid
 
-- - -
-Composer-based installation
+    - - -
+    Composer-based installation
 
-    vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
+        vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
-Legacy installation
+    Legacy installation
 
-    typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
+        typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
-#### for page recursive for pid=20
+*   for page recursive for pid=20
 
-- - -
-Composer-based installation
+    - - -
+    Composer-based installation
 
-    vendor/bin/typo3 ig_slug:update pages 20 -R
+        vendor/bin/typo3 ig_slug:update pages 20 -R
 
-Legacy installation
+    Legacy installation
 
-    typo3/sysext/core/bin/typo3 ig_slug:update pages 20 -R
+        typo3/sysext/core/bin/typo3 ig_slug:update pages 20 -R
 
-#### only for default language:
+*   only for default language:
 
-- - -
-Composer-based installation
+    - - -
+    Composer-based installation
 
-    vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
+        vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
 
-Legacy installation
+    Legacy installation
 
-    typo3/sysext/core/bin/typo3 ig_slug:update -L 0 -R -- pages 20
+        typo3/sysext/core/bin/typo3 ig_slug:update -L 0 -R -- pages 20
 
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
