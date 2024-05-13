@@ -34,7 +34,6 @@ Download and install the extension with the extension manager module.
 The slugs can also be
 *   completely rebuilt in CLI
 
-    - - -
     Composer-based installation
 
         vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
@@ -45,7 +44,6 @@ The slugs can also be
 
 *   with pid
 
-    - - -
     Composer-based installation
 
         vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
@@ -56,7 +54,6 @@ The slugs can also be
 
 *   for page recursive for pid=20
 
-    - - -
     Composer-based installation
 
         vendor/bin/typo3 ig_slug:update pages 20 -R
@@ -67,7 +64,6 @@ The slugs can also be
 
 *   only for default language:
 
-    - - -
     Composer-based installation
 
         vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
