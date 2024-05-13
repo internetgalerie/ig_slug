@@ -31,8 +31,9 @@ Download and install the extension with the extension manager module.
 
 ### 2) CLI
 
-The slugs can also rebuilded in CLI, e.g.
+The slugs can also completely be rebuilt in CLI, e.g.
 
+- - -
 #### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
@@ -43,6 +44,7 @@ The slugs can also rebuilded in CLI, e.g.
 
 or with pid
 
+- - -
 #### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
@@ -53,6 +55,7 @@ or with pid
 
 for page recursive for pid=20
 
+- - -
 #### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update pages 20 -R
@@ -63,6 +66,7 @@ for page recursive for pid=20
 
 or only for default language:
 
+- - -
 #### Composer-based installation
 
     vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
