@@ -32,7 +32,7 @@ Download and install the extension with the extension manager module.
 ### 2) CLI
 
 The slugs can also be
-*   completely rebuilt in CLI
+*   completely rebuilt in CLI:
 
     Composer-based installation
 
@@ -42,7 +42,7 @@ The slugs can also be
 
         typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-*   with pid
+*   with pid:
 
     Composer-based installation
 
@@ -52,7 +52,7 @@ The slugs can also be
 
         typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
-*   for page recursive for pid=20
+*   for page recursive for pid=20:
 
     Composer-based installation
 
