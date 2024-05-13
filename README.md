@@ -33,32 +33,21 @@ Download and install the extension with the extension manager module.
 
 The slugs can also rebuilded in CLI, e.g.
 
-.. tabs::
+=== "Composer-based installation"
 
-   .. group-tab:: Composer-based installation
+    vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-      .. code-block:: bash
-
-         vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
-
+=== "Legacy installation"
    .. group-tab:: Legacy installation
 
-      .. code-block:: bash
-
-         typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
+    typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
 
 or with pid
 
-.. tabs::
+=== "Composer-based installation"
 
-   .. group-tab:: Composer-based installation
-
-      .. code-block:: bash
-
-         vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
-
-   .. group-tab:: Legacy installation
+    vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
 
       .. code-block:: bash
 
