@@ -166,7 +166,7 @@ class SlugUtility
         $queryBuilder->update($this->table)
                      ->where(
                          $queryBuilder->expr()
-->eq('uid', $queryBuilder->createNamedParameter($entry['uid'], \PDO::PARAM_INT))
+                                      ->eq('uid', (int)$entry['uid'])
                      )
                      ->set($this->slugFieldName, $entry['newSlug'])
                      ->executeStatement();
@@ -181,15 +181,14 @@ class SlugUtility
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()
-->removeAll()
-->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+                     ->removeAll()
+                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
         return $queryBuilder
-                     ->select('pid')
-                     ->from('pages')
-                     ->where(
-                         $queryBuilder->expr()
-->eq('uid', $queryBuilder->createNamedParameter($t3verOid, \PDO::PARAM_INT))
-                     )->executeQuery()
-                     ->fetchOne();
+            ->select('pid')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('uid', $t3verOid)
+            )->executeQuery()
+            ->fetchOne();
     }
 }

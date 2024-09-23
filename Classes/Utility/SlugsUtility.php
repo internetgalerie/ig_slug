@@ -117,12 +117,12 @@ class SlugsUtility
     ): array {
         if (
             !$this->getBackendUser()
-->check('tables_modify', $this->table)
+                  ->check('tables_modify', $this->table)
             ||
             (
                 $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false
                 && !$this->getBackendUser()
-->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
+                         ->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
             )
         ) {
             return [];
@@ -233,7 +233,7 @@ class SlugsUtility
         }
 
         $statement = $this->getStatementByPid($uids, $lang);
-        while ($record = $statement->fetch()) {
+        while ($record = $statement->fetchAssociative()) {
             $hasUpdate = false;
             if ($this->table != 'pages' ||
                 (
@@ -290,7 +290,7 @@ class SlugsUtility
         );
 
         $statement = $this->getStatementAll($lang);
-        while ($record = $statement->fetch()) {
+        while ($record = $statement->fetchAssociative()) {
             if ($this->table != 'pages' ||
                 (
                     $GLOBALS['TCA'][$this->table]['ctrl']['languageField']
@@ -355,12 +355,12 @@ class SlugsUtility
             $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
             if (count($slugFields)) {
                 if ($this->getBackendUser()->check('tables_modify', $tableName)
-                &&
-                (
-                    !($GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false)
-                    || $this->getBackendUser()
-->check('non_exclude_fields', $tableName . ':' . $slugFields[0])
-                )) {
+                    &&
+                    (
+                        !($GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false)
+                        || $this->getBackendUser()
+                                ->check('non_exclude_fields', $tableName . ':' . $slugFields[0])
+                    )) {
                     $slugFieldName = $slugFields[0];
                     $slugLockedFieldName = isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
                     $slugTables[$tableName] = [
@@ -398,11 +398,11 @@ class SlugsUtility
             ->from('pages')
             ->where(
                 $queryBuilder->expr()
-->eq('pid', $queryBuilder->createNamedParameter($pid, \PDO::PARAM_INT)),
+                             ->eq('pid', $pid),
                 $queryBuilder->expr()
-->eq('sys_language_uid', $queryBuilder->createNamedParameter(0, \PDO::PARAM_INT)),
+                             ->eq('sys_language_uid', 0),
                 $this->getBackendUser()
-->getPagePermsClause(Permission::PAGE_SHOW)
+                     ->getPagePermsClause(Permission::PAGE_SHOW)
             );
 
         if (!empty($GLOBALS['TCA']['pages']['ctrl']['sortby'])) {
@@ -446,17 +446,17 @@ class SlugsUtility
                 if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
                     $queryBuilder->andWhere(
                         $queryBuilder->expr()
-->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds())
+                                     ->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds())
                     );
                 }
 
                 if ($lang !== null) {
                     $queryBuilder->andWhere(
                         $queryBuilder->expr()
-->eq(
-    $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
-    $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
-)
+                                     ->eq(
+                                         $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
+                                         $lang
+                                     )
                     );
                 }
             }
@@ -489,14 +489,14 @@ class SlugsUtility
                      ->from($this->table)
                      ->where(
                          $queryBuilder->expr()
-->or($queryBuilder->expr() ->in('uid', $uids), $queryBuilder->expr() ->in('l10n_parent', $uids)),
+                                      ->or($queryBuilder->expr() ->in('uid', $uids), $queryBuilder->expr() ->in('l10n_parent', $uids)),
                          $this->getBackendUser()
-->getPagePermsClause(Permission::PAGE_SHOW)
+                              ->getPagePermsClause(Permission::PAGE_SHOW)
                      );
 
         /*
           if($lang !== null) {
-          $queryBuilder->andWhere($queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)));
+          $queryBuilder->andWhere($queryBuilder->expr()->eq('sys_language_uid', $lang));
           }
         */
 
@@ -527,17 +527,17 @@ class SlugsUtility
             if (!$this->getBackendUser()->isAdmin() && $this->getBackendUser()->groupData['allowed_languages'] !== '') {
                 $queryBuilder->andWhere(
                     $queryBuilder->expr()
-->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds())
+                                 ->in($GLOBALS['TCA'][$this->table]['ctrl']['languageField'], $this->getLanguageIds())
                 );
             }
 
             if ($lang !== null) {
                 $queryBuilder->andWhere(
                     $queryBuilder->expr()
-->eq(
-    $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
-    $queryBuilder->createNamedParameter($lang, \PDO::PARAM_INT)
-)
+                                 ->eq(
+                                     $GLOBALS['TCA'][$this->table]['ctrl']['languageField'],
+                                     $lang
+                                 )
                 );
             }
         }
