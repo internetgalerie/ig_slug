@@ -9,7 +9,7 @@ use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\DataHandling\Model\RecordStateFactory;
-use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -141,10 +141,8 @@ class SlugUtility
 
             $entry['depthHTML'] = $depthHTML;
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-            $iconHtml = $iconFactory->getIconForRecord('pages', $entry, Icon::SIZE_SMALL)->render();
+            $iconHtml = $iconFactory->getIconForRecord('pages', $entry, IconSize::SMALL)->render();
             $entry['iconWithLink'] = BackendUtility::wrapClickMenuOnIcon($iconHtml, 'pages', $record['uid']);
-            /*
-             */
         }
 
         foreach ($this->fieldNamesToShow as $fieldName) {
