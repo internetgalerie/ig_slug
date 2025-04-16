@@ -77,30 +77,30 @@ class SlugsUtility
         $this->fieldNamesToShow = $fieldNamesToShow;
     }
 
-    public function populateSlugsAll(int $lang = null): int
+    public function populateSlugsAll(?int $lang = null): int
     {
         $this->doSlugsAll(true, $lang);
         return $this->countUpdates;
     }
 
-    public function populateSlugs(array $uids, int $lang = null): int
+    public function populateSlugs(array $uids, ?int $lang = null): int
     {
         $this->doSlugs($uids, true, false, 1, $lang);
         return $this->countUpdates;
     }
 
-    public function populateSlugsByUidRecursive(array $uids, int $depth, int $lang = null): int
+    public function populateSlugsByUidRecursive(array $uids, int $depth, ?int $lang = null): int
     {
         $this->doSlugs($uids, true, true, $depth, $lang);
         return $this->countUpdates;
     }
 
-    public function viewSlugs(array $uids, int $lang = null): array
+    public function viewSlugs(array $uids, ?int $lang = null): array
     {
         return $this->doSlugs($uids, false, false, 1, $lang);
     }
 
-    public function viewSlugsByUidRecursive(array $uids, int $depth, int $lang = null): array
+    public function viewSlugsByUidRecursive(array $uids, int $depth, ?int $lang = null): array
     {
         return $this->doSlugs($uids, false, true, $depth, $lang);
     }
@@ -113,7 +113,7 @@ class SlugsUtility
         bool $doUdpates = false,
         bool $recursive = false,
         int $maxDepth = 100,
-        int $lang = null
+        ?int $lang = null
     ): array {
         if (
             !$this->getBackendUser()
@@ -167,7 +167,7 @@ class SlugsUtility
         bool $doUdpates = false,
         bool $recursive = false,
         int $depth = 10,
-        int $lang = null
+        ?int $lang = null
     ): array {
         $entries = [];
         $recursiveEntries = [];
@@ -224,7 +224,7 @@ class SlugsUtility
         bool $doUdpates = false,
         bool $recursive = false,
         int $depth = 0,
-        int $lang = null,
+        ?int $lang = null,
         bool $parentHasUpdates = false
     ): array {
         $entries = [];
@@ -277,7 +277,7 @@ class SlugsUtility
     /**
      * Fills the database table with slugs based on the slug fields and its configuration.
      */
-    public function doSlugsAll(bool $doUdpates = false, int $lang = null): array
+    public function doSlugsAll(bool $doUdpates = false, ?int $lang = null): array
     {
         $entries = [];
         $this->slugUtility = GeneralUtility::makeInstance(
@@ -425,7 +425,7 @@ class SlugsUtility
     }
 
 
-    protected function getStatementByPid($uids, int $lang = null): Result
+    protected function getStatementByPid($uids, ?int $lang = null): Result
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
@@ -471,7 +471,7 @@ class SlugsUtility
     }
 
     // only for table pages
-    protected function getStatementByUid(array $uids, int $lang = null): array
+    protected function getStatementByUid(array $uids, ?int $lang = null): array
     {
         if ($uids === []) {
             return [];
@@ -511,7 +511,7 @@ class SlugsUtility
     }
 
 
-    protected function getStatementAll(int $lang = null): Result
+    protected function getStatementAll(?int $lang = null): Result
     {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable($this->table);
         $queryBuilder = $connection->createQueryBuilder();
@@ -550,7 +550,7 @@ class SlugsUtility
         return $queryBuilder->executeQuery();
     }
 
-    
+
     protected function getBackendUser(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
