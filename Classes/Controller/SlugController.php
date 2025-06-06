@@ -48,6 +48,8 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 
     protected $activeTable;
 
+    protected $fields;
+
 
     public function __construct(
         protected readonly ModuleTemplateFactory $moduleTemplateFactory,
@@ -68,9 +70,6 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 ->pushModuleData($this->moduleData->getModuleIdentifier(), $this->moduleData->toArray());
 
         $filterMenus = $this->modMenu();
-
-        $fields = $this->slugsUtility->getSlugFields();
-        $this->slugsUtility->setFieldNamesToShow($fields);
 
         if ($this->slugTable['table'] == 'pages') {
             $entries = $this->slugsUtility->viewSlugsByUidRecursive([$this->pageUid], $this->depth, $this->lang);
@@ -106,11 +105,10 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $routeName = 'web_IgSlug';
         }
 
-
         $this->moduleTemplate->assignMultiple([
             'search' => $this->search,
             'filterMenus' => $filterMenus,
-            'fields' => $fields,
+            'fields' => $this->fields,
             'entries' => $entries,
             'slugTables' => $this->slugTables,
             'activeTable' => $this->activeTable,
@@ -230,6 +228,8 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->slugsUtility->setTable($this->slugTable['table']);
         $this->slugsUtility->setSlugFieldName($this->slugTable['slugFieldName']);
         $this->slugsUtility->setSlugLockedFieldName($this->slugTable['slugLockedFieldName']);
+        $this->fields = $this->slugsUtility->getSlugFields();
+        $this->slugsUtility->setFieldNamesToShow($this->fields);
         return true;
     }
 
