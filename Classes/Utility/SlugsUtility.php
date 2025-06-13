@@ -115,16 +115,7 @@ class SlugsUtility
         int $maxDepth = 100,
         ?int $lang = null
     ): array {
-        if (
-            !$this->getBackendUser()
-                  ->check('tables_modify', $this->table)
-            ||
-            (
-                $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false
-                && !$this->getBackendUser()
-                         ->check('non_exclude_fields', $this->table . ':' . $this->slugFieldName)
-            )
-        ) {
+        if (!$this->hasTableSlugFieldModifyAccess($this->table, $this->slugFieldName)) {
             return [];
         }
 
@@ -140,7 +131,6 @@ class SlugsUtility
 
         $this->maxDepth = $maxDepth;
         $this->countUpdates = 0;
-
 
         $this->slugUtility = GeneralUtility::makeInstance(
             SlugUtility::class,
@@ -354,13 +344,8 @@ class SlugsUtility
         foreach ($tableNames as $tableName) {
             $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
             if (count($slugFields)) {
-                if ($this->getBackendUser()->check('tables_modify', $tableName)
-                    &&
-                    (
-                        !($GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName]['exclude'] ?? false)
-                        || $this->getBackendUser()
-                                ->check('non_exclude_fields', $tableName . ':' . $slugFields[0])
-                    )) {
+                $slugFieldConfig = $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName] ?? [];
+                if ($this->hasTableSlugFieldModifyAccess($tableName, $slugFields[0])) {
                     $slugFieldName = $slugFields[0];
                     $slugLockedFieldName = isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName . '_locked']) ? $slugFieldName . '_locked' : null;
                     $slugTables[$tableName] = [
@@ -550,6 +535,17 @@ class SlugsUtility
         return $queryBuilder->executeQuery();
     }
 
+    protected function hasTableSlugFieldModifyAccess(string $tableName, string $slugFieldName): bool
+    {
+        $hasTableModifyAccess = $this->getBackendUser()->check('tables_modify', $tableName);
+        if (!isset($GLOBALS['TCA'][$tableName]['columns'][$slugFieldName])) {
+            return false;
+        }
+        $slugFieldConfig = $GLOBALS['TCA'][$tableName]['columns'][$slugFieldName];
+        $requiresPermission = $slugFieldConfig['exclude'] ?? false;
+        $hasFieldAccess = !$requiresPermission || $this->getBackendUser()->check('non_exclude_fields', $tableName . ':' . $slugFieldName);
+        return $hasTableModifyAccess && $hasFieldAccess;
+    }
 
     protected function getBackendUser(): BackendUserAuthentication
     {
