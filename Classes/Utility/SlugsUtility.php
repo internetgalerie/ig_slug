@@ -10,7 +10,6 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Database\Query\Restriction\WorkspaceRestriction;
-use TYPO3\CMS\Core\DataHandling\SlugEnricher;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -34,6 +33,8 @@ class SlugsUtility
     protected $siteLanguages;
 
     protected $slugUtility;
+
+    protected array $slugFieldNamesPerTable = [];
 
 
     /**
@@ -340,9 +341,8 @@ class SlugsUtility
             }
         }
 
-        $slugEnricher = GeneralUtility::makeInstance(SlugEnricher::class);
         foreach ($tableNames as $tableName) {
-            $slugFields = $slugEnricher->resolveSlugFieldNames($tableName);
+            $slugFields = $this->resolveSlugFieldNames($tableName);
             if (count($slugFields)) {
                 $slugFieldConfig = $GLOBALS['TCA'][$this->table]['columns'][$this->slugFieldName] ?? [];
                 if ($this->hasTableSlugFieldModifyAccess($tableName, $slugFields[0])) {
@@ -545,6 +545,25 @@ class SlugsUtility
         $requiresPermission = $slugFieldConfig['exclude'] ?? false;
         $hasFieldAccess = !$requiresPermission || $this->getBackendUser()->check('non_exclude_fields', $tableName . ':' . $slugFieldName);
         return $hasTableModifyAccess && $hasFieldAccess;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function resolveSlugFieldNames(string $tableName): array
+    {
+        if (isset($this->slugFieldNamesPerTable[$tableName])) {
+            return $this->slugFieldNamesPerTable[$tableName];
+        }
+
+        return $this->slugFieldNamesPerTable[$tableName] = array_keys(
+            array_filter(
+                $GLOBALS['TCA'][$tableName]['columns'] ?? [],
+                static function (array $settings): bool {
+                    return ($settings['config']['type'] ?? null) === 'slug';
+                }
+            )
+        );
     }
 
     protected function getBackendUser(): BackendUserAuthentication
