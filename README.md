@@ -22,7 +22,7 @@ Workspaces are not yet implemented.
 
 #### Installation using Composer
 
-The recommended way to install the extension is by using [Composer][2]. In your Composer based TYPO3 project root, just do `composer require internetgalerie/ig-slug`. 
+The recommended way to install the extension is by using [Composer][2]. In your Composer based TYPO3 project root, just do `composer require internetgalerie/ig-slug`.
 
 #### Installation as extension from TYPO3 Extension Repository (TER)
 
@@ -31,22 +31,48 @@ Download and install the extension with the extension manager module.
 
 ### 2) CLI
 
-The slugs can also rebuilded in CLI, e.g.
+The slugs can also be
+*   completely rebuilt in CLI:
 
-`vendor/bin/typo3 ig_slug:update tx_news_domain_model_news`
+    Composer-based installation
 
-or with pid 
+        vendor/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-`vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99` 
+    Legacy installation
 
-for page recursive for pid=20
+        typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news
 
-`vendor/bin/typo3 ig_slug:update pages 20 -R`
+*   with pid:
 
-or only for default language:
+    Composer-based installation
 
-`vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20`
+        vendor/bin/typo3 ig_slug:update tx_news_domain_model_news 99
+
+    Legacy installation
+
+        typo3/sysext/core/bin/typo3 ig_slug:update tx_news_domain_model_news 99
+
+*   for page recursive for pid=20:
+
+    Composer-based installation
+
+        vendor/bin/typo3 ig_slug:update pages 20 -R
+
+    Legacy installation
+
+        typo3/sysext/core/bin/typo3 ig_slug:update pages 20 -R
+
+*   only for default language:
+
+    Composer-based installation
+
+        vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20
+
+    Legacy installation
+
+        typo3/sysext/core/bin/typo3 ig_slug:update -L 0 -R -- pages 20
+
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
 [2]: https://getcomposer.org/
-
+[3]: https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ApiOverview/CommandControllers/Index.html
