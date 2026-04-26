@@ -35,7 +35,8 @@ class UpdateCommand extends Command
             ->addArgument('tablename', InputArgument::REQUIRED, 'the tablename to create/update the slugs')
             ->addArgument('pid', InputArgument::OPTIONAL, 'the pid to use for rebuild', 0)
             ->addOption('recursive', 'R', InputOption::VALUE_OPTIONAL, 'recursive level', 0)
-            ->addOption('language', 'L', InputOption::VALUE_REQUIRED, 'limit to languages');
+            ->addOption('language', 'L', InputOption::VALUE_REQUIRED, 'limit to languages')
+            ->addOption('create-redirects', 'C', InputOption::VALUE_NONE, 'Automatically create redirects for changed slugs');
     }
  
     /**
@@ -51,13 +52,13 @@ class UpdateCommand extends Command
         $tablename = $input->getArgument('tablename');
         $pid = (int)$input->getArgument('pid');
         $recursive = (int)($input->getOption('recursive') ?? 999);
+        $autoCreateRedirects = $input->getOption('create-redirects');
 
         // language: null is all
         $language = $input->getOption('language');
         if ($language !== null) {
             $language = (int)$language;
         }
-
         $siteLanguages = [];
         if ($pid) {
             try {
@@ -91,6 +92,7 @@ class UpdateCommand extends Command
             $fields = $slugsUtility->getSlugFields();
             $slugsUtility->setFieldNamesToShow($fields);
             if ($tablename == 'pages') {
+                $slugsUtility->setAutoCreateRedirects($autoCreateRedirects);
                 $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
             } elseif ($pid > 0) {
                 $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);

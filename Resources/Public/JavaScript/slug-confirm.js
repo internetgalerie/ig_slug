@@ -8,7 +8,9 @@ class SlugConfirm {
 	    // confirt/rebuild Button
 	    let rebuildButton = document.getElementById("slug-rebuild-button");
 	    rebuildButton.addEventListener('click', (e) => {
-		let rebuildUrl = rebuildButton.dataset.rebuildUrl;
+		let autoCreateRedirectsBox = document.getElementById("slug-auto-create-redirects");
+		let rebuildUrl = rebuildButton.dataset.rebuildUrl
+		    + (autoCreateRedirectsBox.checked ? '&autoCreateRedirects=1' : '');
 		this.dialog(rebuildButton.dataset.dialogTitle,rebuildButton.dataset.dialogMessage, rebuildUrl);
 	    });
 	    // filters reload on changes

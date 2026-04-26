@@ -17,25 +17,16 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class SlugsUtility
 {
     protected string $table = 'pages';
-
     protected string $slugFieldName = 'slug';
-
     protected ?string $slugLockedFieldName = 'slug_locked';
-
     protected array $fieldNamesToShow = ['title'];
-
+    protected bool $autoCreateRedirects = false;
     protected int $countUpdates = 0;
-
     protected int $maxDepth = 100;
-
     protected array $siteLanguagesIds = [];
-
     protected $siteLanguages;
-
     protected $slugUtility;
-
     protected array $slugFieldNamesPerTable = [];
-
 
     /**
      * Instantiate the form protection before a simulated user is initialized.
@@ -76,6 +67,11 @@ class SlugsUtility
     public function setFieldNamesToShow(array $fieldNamesToShow): void
     {
         $this->fieldNamesToShow = $fieldNamesToShow;
+    }
+
+    public function setAutoCreateRedirects(bool $autoCreateRedirects): void
+    {
+        $this->autoCreateRedirects = $autoCreateRedirects;
     }
 
     public function populateSlugsAll(?int $lang = null): int
@@ -178,6 +174,9 @@ class SlugsUtility
                 if ($doUdpates && $entry['updated']) {
                     ++$this->countUpdates;
                     $this->slugUtility->updateEntry($entry);
+                    if ($this->autoCreateRedirects) {
+                        $this->slugUtility->createRedirects($entry);
+                    }
                 }
 
                 $entries[] = $entry;
@@ -238,6 +237,9 @@ class SlugsUtility
                 if ($doUdpates && $entry['updated']) {
                     ++$this->countUpdates;
                     $this->slugUtility->updateEntry($entry);
+                    if ($this->autoCreateRedirects) {
+                        $this->slugUtility->createRedirects($entry);
+                    }
                 }
 
                 $entries[] = $entry;
@@ -293,6 +295,9 @@ class SlugsUtility
                 if ($doUdpates && $entry['updated']) {
                     ++$this->countUpdates;
                     $this->slugUtility->updateEntry($entry);
+                    if ($this->autoCreateRedirects) {
+                        $this->slugUtility->createRedirects($entry);
+                    }
                 }
 
                 $entries[] = $entry;

@@ -27,6 +27,15 @@
 
       <f:render partial="Slug/ListEntries" arguments="{_all}" />
 
+      <div class="form-wizards-item-element">
+	<div class="form-check">
+	  <f:form.checkbox name="autoCreateRedirects" value="1" class="form-check-input" id="slug-auto-create-redirects" />
+	  <label class="form-check-label" for="slug-auto-create-redirects">
+	    <f:translate key="LLL:EXT:redirects/Resources/Private/Language/locallang.xlf:redirects.autoCreateRedirects" />
+	  </label>
+	</div>
+      </div>
+
       <a class="btn btn-danger" id="slug-rebuild-button" data-rebuild-url="{rebuildUrl}" data-dialog-title="{f:translate(key: 'igSlug.confirm.title')}" data-dialog-message="{f:translate(key: 'igSlug.confirm.message')}" href="javascript:void(0)">
         <core:icon identifier="actions-save"/>
         <f:translate key="igSlug.populateSlug" extensionName="IgSlug" />

@@ -228,6 +228,8 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->slugsUtility->setTable($this->slugTable['table']);
         $this->slugsUtility->setSlugFieldName($this->slugTable['slugFieldName']);
         $this->slugsUtility->setSlugLockedFieldName($this->slugTable['slugLockedFieldName']);
+        $autoCreateRedirects = $this->request->hasArgument('autoCreateRedirects') ? (bool) $this->request->getArgument('autoCreateRedirects') : false;
+        $this->slugsUtility->setAutoCreateRedirects($autoCreateRedirects);
         $this->fields = $this->slugsUtility->getSlugFields();
         $this->slugsUtility->setFieldNamesToShow($this->fields);
         return true;
