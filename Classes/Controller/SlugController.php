@@ -67,7 +67,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->moduleData->set('search', $this->search);
 
         $this->getBackendUser()
-->pushModuleData($this->moduleData->getModuleIdentifier(), $this->moduleData->toArray());
+            ->pushModuleData($this->moduleData->getModuleIdentifier(), $this->moduleData->toArray());
 
         $filterMenus = $this->modMenu();
 
@@ -82,13 +82,13 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->pageinfo = BackendUtility::readPageAccess(
             $this->pageUid,
             $this->getBackendUser()
-->getPagePermsClause(Permission::PAGE_SHOW)
+                ->getPagePermsClause(Permission::PAGE_SHOW)
         ) ?: [];
         // The page will show only if there is a valid page and if this page
         // may be viewed by the user
         if ($this->pageinfo !== []) {
             $this->moduleTemplate->getDocHeaderComponent()
-->setMetaInformation($this->pageinfo);
+                ->setMetaInformation($this->pageinfo);
         }
 
         // own menu item or subitem of web info
@@ -184,6 +184,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $this->pageRenderer->loadJavaScriptModule('@typo3/backend/modal.js');
         $this->pageRenderer->loadJavaScriptModule('@typo3/backend/context-menu.js');
         $this->pageRenderer->loadJavaScriptModule('@ig/igslug/slug-confirm.js');
+        $this->pageRenderer->addInlineLanguageLabelFile('EXT:ig_slug/Resources/Private/Language/locallang.xlf');
         $this->pageRenderer->addCssFile('EXT:ig_slug/Resources/Public/Css/ig_slug_be.css');
     }
 

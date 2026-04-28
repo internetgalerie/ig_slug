@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file target-language="en" datatype="plaintext" original="messages" date="2018-11-24T09:35:38Z" product-name="igSlug" source-language="de">
-		<header/>
-		<body>
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file target-language="de" source-language="en" datatype="plaintext" original="EXT:ig_slug/Resources/Private/Language/locallang.xlf" date="2018-11-24T09:35:39Z" product-name="ig_slug">
+    <header/>
+    <body>
+
 			<trans-unit id="igSlug.pageTitle">
 				<target>Slugs</target>
 			</trans-unit>
 			<trans-unit id="igSlug.populateSlug">
-				<target>Slugs neubilden</target>
+				<target>Slugs neu bilden</target>
 			</trans-unit>
 			<trans-unit id="igSlug.populatedSlug">
 				<target>%d slug aktualisiert</target>
@@ -33,11 +34,26 @@
 			<trans-unit id="igSlug.changes">
 				<target>nur Änderungen</target>
 			</trans-unit>
-			<trans-unit id="igSlug.confirm.title">
-				<target>Bestätigen</target>
+			<trans-unit id="igSlug.confirm.entry.title">
+				<target>Alle Einträge neu bilden?</target>
 			</trans-unit>
-			<trans-unit id="igSlug.confirm.message">
-				<target>Tatsächlich alle Einträge neu bilden?</target>
+			<trans-unit id="igSlug.confirm.page.title">
+				<target>Alle URL Segmente neu bilden?</target>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.entry.message">
+				<target>Aktuelle Werte werden überschrieben. Bestehende URLs können ungültig werden.</target>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.page.message">
+				<target>Optional: Weiterleitungen für die geänderten URL-Segmente erstellen.</target>
+			</trans-unit>
+			<trans-unit id="igSlug.button.update">
+				<target>Neu bilden</target>
+			</trans-unit>
+			<trans-unit id="igSlug.button.updateAndRedirects">
+				<target>Neu bilden &amp; Weiterleiten</target>
+			</trans-unit>
+			<trans-unit id="igSlug.button.updateOnly">
+				<target>Nur neu bilden</target>
 			</trans-unit>
 		</body>
 	</file>

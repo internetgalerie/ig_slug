@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<xliff version="1.0">
-	<file source-language="en" datatype="plaintext" original="messages" date="2018-11-24T09:35:38Z" product-name="igSlug">
-		<header/>
-		<body>
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" datatype="plaintext" original="EXT:ig_slug/Resources/Private/Language/locallang.xlf" date="2018-11-24T09:35:39Z" product-name="ig_slug">
+    <header/>
+    <body>
 			<trans-unit id="igSlug.pageTitle">
 				<source>Slugs</source>
 			</trans-unit>
@@ -33,11 +33,26 @@
 			<trans-unit id="igSlug.changes">
 				<source>only changes</source>
 			</trans-unit>
-			<trans-unit id="igSlug.confirm.title">
-				<source>Confirm</source>
+			<trans-unit id="igSlug.confirm.entry.title">
+				<source>Rebuild all slugs?</source>
 			</trans-unit>
-			<trans-unit id="igSlug.confirm.message">
-				<source>Really rebuild the slugs?</source>
+			<trans-unit id="igSlug.confirm.page.title">
+				<source>Rebuild all URL segments?</source>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.entry.message">
+				<source>Current values will be overwritten. Existing URLs may become invalid.</source>
+			</trans-unit>
+			<trans-unit id="igSlug.confirm.page.message">
+				<source>Optional: Create redirects for the modified URL segments.</source>
+			</trans-unit>
+			<trans-unit id="igSlug.button.update">
+				<source>Rebuild</source>
+			</trans-unit>
+			<trans-unit id="igSlug.button.updateOnly">
+				<source>Rebuild only</source>
+			</trans-unit>
+			<trans-unit id="igSlug.button.updateAndRedirects">
+				<source>Rebuild &amp; redirect</source>
 			</trans-unit>
 		</body>
 	</file>
