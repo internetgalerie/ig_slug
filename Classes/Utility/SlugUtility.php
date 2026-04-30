@@ -14,27 +14,20 @@ use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\LinkHandling\LinkService;
+use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 class SlugUtility
 {
     protected $slugHelper;
-
     protected $table;
-
     protected $slugFieldName;
-
     protected $slugLockedFieldName = null;
-
     protected $hasToBeUniqueInSite;
-
     protected $hasToBeUniqueInPid;
-
     protected $hasToBeUniqueInTable;
-
     protected $fieldNamesToShow;
-
     protected $flags = [];
 
     /**
@@ -85,7 +78,7 @@ class SlugUtility
         }
 
         $slugLocked = $this->slugLockedFieldName !== null && isset($record[$this->slugLockedFieldName])
-                    && $record[$this->slugLockedFieldName] == 1;
+            && $record[$this->slugLockedFieldName] == 1;
         if ($slugLocked) {
             $slug = $record[$this->slugFieldName];
         } else {
@@ -176,7 +169,7 @@ class SlugUtility
         $queryBuilder->update($this->table)
             ->where(
                 $queryBuilder->expr()
-                            ->eq('uid', (int)$entry['uid'])
+                    ->eq('uid', (int)$entry['uid'])
             )
             ->set($this->slugFieldName, $entry['newSlug'])
             ->executeStatement();
@@ -192,8 +185,8 @@ class SlugUtility
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('pages');
         $queryBuilder = $connection->createQueryBuilder();
         $queryBuilder->getRestrictions()
-                     ->removeAll()
-                     ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+            ->removeAll()
+            ->add(GeneralUtility::makeInstance(DeletedRestriction::class));
         return $queryBuilder
             ->select('pid')
             ->from('pages')
@@ -205,15 +198,12 @@ class SlugUtility
 
     /**
      * Create redirects for changes of slug
-     * no events are fired:
-     *   - ModifyAutoCreateRedirectRecordBeforePersistingEvent
-     *   - AfterAutoCreateRedirectHasBeenPersistedEvent
      *
      * @param array $entry The entry to update
      */
     public function createRedirects(array $entry): int
     {
-        // Autoredirect for new slugs for table pages
+        // Autoredirect for new slugs for table pages only
         if($this->table !== 'pages') {
             return 0;
         }
@@ -231,18 +221,91 @@ class SlugUtility
         ];
         $target = $linkService->asString($linkDetails);
 
+        $slugVariants = $this->getSlugVariants($entry['slug'], $site);
+
+        $created = 0;
+        foreach ($slugVariants as $slugVariant) {
+            $created += $this->upsertRedirect($slugVariant, $baseUrl, $target);
+        }
+
+        return $created;
+    }
+
+    /**
+     * Returns all slug variants to redirect, including suffixes from PageTypeSuffix enhancers.
+     * Only suffixes mapping to page type 0 (default page) are included.
+     *
+     * @param string $slug The base slug
+     * @param Site $site
+     * @return string[]
+     */
+    private function getSlugVariants(string $slug, Site $site): array
+    {
+        $variants = [$slug]; // always include bare slug
+
+        $routeEnhancers = $site->getConfiguration()['routeEnhancers'] ?? [];
+
+        foreach ($routeEnhancers as $enhancer) {
+            // Only handle PageType enhancers
+            if (($enhancer['type'] ?? '') !== 'PageType') {
+                continue;
+            }
+
+            $default = $enhancer['default'] ?? '';
+            $map = $enhancer['map'] ?? [];
+
+            foreach ($map as $suffix => $pageType) {
+                $suffix = (string)$suffix;
+
+                if ($suffix === '') {
+                    continue;
+                }
+
+                // Only redirect suffixes that map to page type 0 (normal page)
+                // Skip special types
+                if ((int)$pageType !== 0) {
+                    continue;
+                }
+
+                $variant = rtrim($slug, '/') . $suffix;
+                if (!in_array($variant, $variants, true)) {
+                    $variants[] = $variant;
+                }
+            }
+
+            // Also add the default suffix explicitly if it's not empty and not already covered
+            if ($default !== '' && $default !== '/') {
+                $defaultVariant = rtrim($slug, '/') . $default;
+                if (!in_array($defaultVariant, $variants, true)) {
+                    $variants[] = $defaultVariant;
+                }
+            }
+        }
+
+        return $variants;
+    }
+
+    /**
+     * Insert or update a single redirect record.
+     *
+     * @return int 1 if a record was inserted/updated, 0 on skip
+     */
+    private function upsertRedirect(string $sourcePath, string $sourceHost, string $target): int
+    {
         $connection = GeneralUtility::makeInstance(ConnectionPool::class)->getConnectionForTable('sys_redirect');
         $queryBuilder = $connection->createQueryBuilder();
-        $data = $queryBuilder->select('uid')
+
+        $existing = $queryBuilder
+            ->select('uid')
             ->from('sys_redirect')
             ->where(
                 $queryBuilder->expr()->eq(
                     'source_path',
-                    $queryBuilder->createNamedParameter($entry['slug'], Connection::PARAM_STR)
+                    $queryBuilder->createNamedParameter($sourcePath, Connection::PARAM_STR)
                 ),
                 $queryBuilder->expr()->eq(
                     'source_host',
-                    $queryBuilder->createNamedParameter($baseUrl, Connection::PARAM_STR)
+                    $queryBuilder->createNamedParameter($sourceHost, Connection::PARAM_STR)
                 )
             )
             ->executeQuery()
@@ -250,16 +313,15 @@ class SlugUtility
 
         $now = time();
 
-        if($data) {
+        // Fire own BeforeRedirectPersistedEvent (instead of ModifyAutoCreateRedirectRecordBeforePersistingEvent)
+
+        if ($existing) {
+            $queryBuilder = $connection->createQueryBuilder();
             $queryBuilder->update('sys_redirect')
                 ->where(
                     $queryBuilder->expr()->eq(
                         'uid',
-                        $queryBuilder->createNamedParameter((int)$data, Connection::PARAM_INT)
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'source_host',
-                        $queryBuilder->createNamedParameter($baseUrl, Connection::PARAM_STR)
+                        $queryBuilder->createNamedParameter((int)$existing, Connection::PARAM_INT)
                     )
                 )
                 ->set('target', $target)
@@ -267,14 +329,15 @@ class SlugUtility
                 ->set('updatedon', $now)
                 ->executeStatement();
         } else {
+            $queryBuilder = $connection->createQueryBuilder();
             $queryBuilder
                 ->insert('sys_redirect')
                 ->values([
                     'pid' => 0,
                     'updatedon' => $now,
                     'createdon' => $now,
-                    'source_path' => $entry['slug'],
-                    'source_host' => $baseUrl,
+                    'source_path' => $sourcePath,
+                    'source_host' => $sourceHost,
                     'target' => $target,
                     'target_statuscode' => 301,
                     //'creation_type' => 0,
@@ -282,6 +345,7 @@ class SlugUtility
                 ])
                 ->executeStatement();
         }
+        // Fire own AfterRedirectPersistedEvent (instead of AfterAutoCreateRedirectHasBeenPersistedEvent)
         return 1;
     }
 }

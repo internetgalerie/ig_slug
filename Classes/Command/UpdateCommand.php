@@ -25,6 +25,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class UpdateCommand extends Command
 {
+    public function __construct(
+        protected readonly SlugsUtility $slugsUtility,
+    ) {}
+
     /**
      * Defines the allowed options for this command
      */
@@ -69,9 +73,9 @@ class UpdateCommand extends Command
             }
         }
 
-        $slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $siteLanguages);
+        $this->slugsUtility->setSiteLanguages($siteLanguages);
         try {
-            $slugTables = $slugsUtility->getSlugTables([$tablename], true);
+            $slugTables = $this->slugsUtility->getSlugTables([$tablename], true);
         } catch (Exception\TableNotFoundException) {
             $io->error('Error table "' . $tablename . '" not found (no TCA found)');
             return 1;
@@ -85,20 +89,20 @@ class UpdateCommand extends Command
 
         if (isset($slugTables[$tablename])) {
             $slugTable = $slugTables[$tablename];
-            $slugsUtility->setTable($tablename);
-            $slugsUtility->setTable($slugTable['table']);
-            $slugsUtility->setSlugFieldName($slugTable['slugFieldName']);
-            $slugsUtility->setSlugLockedFieldName($slugTable['slugLockedFieldName']);
-            $fields = $slugsUtility->getSlugFields();
-            $slugsUtility->setFieldNamesToShow($fields);
+            $this->slugsUtility->setTable($tablename);
+            $this->slugsUtility->setTable($slugTable['table']);
+            $this->slugsUtility->setSlugFieldName($slugTable['slugFieldName']);
+            $this->slugsUtility->setSlugLockedFieldName($slugTable['slugLockedFieldName']);
+            $fields = $this->slugsUtility->getSlugFields();
+            $this->slugsUtility->setFieldNamesToShow($fields);
             if ($tablename == 'pages') {
-                $slugsUtility->setAutoCreateRedirects($autoCreateRedirects);
-                $pagesCount = $slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
+                $this->slugsUtility->setAutoCreateRedirects($autoCreateRedirects);
+                $pagesCount = $this->slugsUtility->populateSlugsByUidRecursive([$pid], $recursive, $language);
             } elseif ($pid > 0) {
-                $pageUids = $slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);
-                $pagesCount = $slugsUtility->populateSlugs($pageUids, $language);
+                $pageUids = $this->slugsUtility->getPageRecordsRecursive($pid, $recursive, [$pid]);
+                $pagesCount = $this->slugsUtility->populateSlugs($pageUids, $language);
             } else {
-                $pagesCount = $slugsUtility->populateSlugsAll($language);
+                $pagesCount = $this->slugsUtility->populateSlugsAll($language);
             }
 
             $languageService = $this->getLanguageService();

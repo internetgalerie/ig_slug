@@ -25,33 +25,21 @@ use TYPO3Fluid\Fluid\View\Exception;
 class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
 {
     protected array $search = [];
-
     protected int $depth = 0;
-
     protected ?ModuleData $moduleData = null;
-
     protected ModuleTemplate $moduleTemplate;
-
     protected int $pageUid = 0;
-
-    protected ?SlugsUtility $slugsUtility = null;
-
     protected $siteLanguages = null;
-
     protected $pageinfo = null;
-
     protected ?int $lang = 0;
-
     protected $slugTables;
-
     protected $slugTable;
-
     protected $activeTable;
-
     protected $fields;
 
 
     public function __construct(
+        protected readonly SlugsUtility $slugsUtility,
         protected readonly ModuleTemplateFactory $moduleTemplateFactory,
         protected readonly BackendUriBuilder $backendUriBuilder,
         protected readonly PageRenderer $pageRenderer,
@@ -195,8 +183,7 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
     {
         $this->pageUid = (int)($this->request->getQueryParams()['id'] ?? $this->request->getParsedBody()['id'] ?? 0);
         $this->initializeSiteLanguages();
-        $this->slugsUtility = GeneralUtility::makeInstance(SlugsUtility::class, $this->siteLanguages);
-
+        $this->slugsUtility->setSiteLanguages($this->siteLanguages);
         $this->slugTables = $this->slugsUtility->getSlugTables();
         if (empty($this->slugTables)) {
             throw new Exception('access rights are missing, no table with slugs found', 1549656271);

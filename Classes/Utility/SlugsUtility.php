@@ -28,10 +28,7 @@ class SlugsUtility
     protected $slugUtility;
     protected array $slugFieldNamesPerTable = [];
 
-    /**
-     * Instantiate the form protection before a simulated user is initialized.
-     */
-    public function __construct(array $siteLanguages)
+    public function setSiteLanguages(array $siteLanguages): void
     {
         $this->siteLanguages = $siteLanguages;
         foreach ($this->siteLanguages as $language) {
