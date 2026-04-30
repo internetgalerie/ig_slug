@@ -47,7 +47,9 @@ or only for default language:
 
 `vendor/bin/typo3 ig_slug:update -L 0 -R -- pages 20`
 
-for pages table -C creates auto redirects (currently only entries are created, no events are called!)
+for pages table -C creates redirects (currently only entries are created, no events are called!)
+
+`vendor/bin/typo3 ig_slug:update -C -R -- pages 20`
 
 [1]: https://docs.typo3.org/typo3cms/extensions/ig_slug/
 [2]: https://getcomposer.org/

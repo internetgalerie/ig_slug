@@ -27,7 +27,9 @@ class UpdateCommand extends Command
 {
     public function __construct(
         protected readonly SlugsUtility $slugsUtility,
-    ) {}
+    ) {
+        parent::__construct();
+    }
 
     /**
      * Defines the allowed options for this command

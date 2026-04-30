@@ -212,7 +212,7 @@ class SlugUtility
         $site = $siteFinder->getSiteByPageId($entry['uid']);
         $language = $site->getLanguageById($entry['sys_language_uid']);
         $baseUrl = $language->getBase()->getHost();
-
+        $languagePath = rtrim($language->getBase()->getPath(), '/');
         $linkService = GeneralUtility::makeInstance(LinkService::class);
         $linkDetails = [
             'type' => LinkService::TYPE_PAGE,
@@ -221,7 +221,7 @@ class SlugUtility
         ];
         $target = $linkService->asString($linkDetails);
 
-        $slugVariants = $this->getSlugVariants($entry['slug'], $site);
+        $slugVariants = $this->getSlugVariants($entry['slug'], $site, $languagePath);
 
         $created = 0;
         foreach ($slugVariants as $slugVariant) {
@@ -239,8 +239,11 @@ class SlugUtility
      * @param Site $site
      * @return string[]
      */
-    private function getSlugVariants(string $slug, Site $site): array
+    private function getSlugVariants(string $slug, Site $site, string $languagePath): array
     {
+        // Normalize: ensure single leading slash, no trailing slash
+        $slug = $languagePath . '/' . trim($slug, '/');
+
         $variants = [$slug]; // always include bare slug
 
         $routeEnhancers = $site->getConfiguration()['routeEnhancers'] ?? [];
@@ -257,17 +260,11 @@ class SlugUtility
             foreach ($map as $suffix => $pageType) {
                 $suffix = (string)$suffix;
 
-                if ($suffix === '') {
+                if ($suffix === '' || (int)$pageType !== 0) {
                     continue;
                 }
 
-                // Only redirect suffixes that map to page type 0 (normal page)
-                // Skip special types
-                if ((int)$pageType !== 0) {
-                    continue;
-                }
-
-                $variant = rtrim($slug, '/') . $suffix;
+                $variant = $slug . $suffix;
                 if (!in_array($variant, $variants, true)) {
                     $variants[] = $variant;
                 }
@@ -275,7 +272,7 @@ class SlugUtility
 
             // Also add the default suffix explicitly if it's not empty and not already covered
             if ($default !== '' && $default !== '/') {
-                $defaultVariant = rtrim($slug, '/') . $default;
+                $defaultVariant = $slug . $default;
                 if (!in_array($defaultVariant, $variants, true)) {
                     $variants[] = $defaultVariant;
                 }
