@@ -88,9 +88,9 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
             $this->moduleTemplate->makeDocHeaderModuleMenu([
                 'id' => $this->pageUid,
             ]);
-            $routeName = 'web_info_IgSlug';
+            $routeName = 'site_IgSlug';
         } else {
-            $routeName = 'web_IgSlug';
+            $routeName = 'site_IgSlug';
         }
 
         $this->moduleTemplate->assignMultiple([

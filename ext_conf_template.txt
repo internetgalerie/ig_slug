@@ -1,2 +1,2 @@
-  # cat=basic/enable; type=boolean; label=Show in info module:Disable own menu item and add it to info module
+  # cat=basic/enable; type=boolean; label=Show in link_management module:Disable own menu item and add it to link_management module
 disableOwnMenuItem = 0
