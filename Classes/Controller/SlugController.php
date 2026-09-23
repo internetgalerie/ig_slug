@@ -83,14 +83,22 @@ class SlugController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController
         $disableOwnMenuItem = (int)(GeneralUtility::makeInstance(ExtensionConfiguration::class)->get(
             'ig_slug'
         )['disableOwnMenuItem'] ?? 0);
-        if ($disableOwnMenuItem) {
+        if ($disableOwnMenuItem == 1) {
             // show menu in web info module
             $this->moduleTemplate->makeDocHeaderModuleMenu([
                 'id' => $this->pageUid,
             ]);
+            $routeName = 'web_info_IgSlug';
+        } elseif ($disableOwnMenuItem == 2) {
+            // show menu in Link Management module
+            $this->moduleTemplate->makeDocHeaderModuleMenu([
+                'id' => $this->pageUid,
+            ]);
+            $routeName = 'site_IgSlug';
+        } elseif ($disableOwnMenuItem == 4) {
             $routeName = 'site_IgSlug';
         } else {
-            $routeName = 'site_IgSlug';
+            $routeName = 'web_IgSlug';
         }
 
         $this->moduleTemplate->assignMultiple([

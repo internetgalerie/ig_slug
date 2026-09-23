@@ -1,2 +1,2 @@
-  # cat=basic/enable; type=boolean; label=Show in link_management module:Disable own menu item and add it to link_management module
+# cat=basic; type=options[As main menu item in Web section=0, As main menu item in Site section=4, Submodule inside Info module=1, Submodule inside Link Management (TYPO3 v14+)=2]; label=Menu Placement: Choose where the module should appear in the TYPO3 backend menu.
 disableOwnMenuItem = 0
